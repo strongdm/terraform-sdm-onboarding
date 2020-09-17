@@ -66,7 +66,30 @@ variable SDM_API_SECRET_KEY {}
 
 Create a `.tf` file (in this example, we called it `onboarding.tf`) and paste in the module.
 
-```tf
+#### Minimal install
+This install option creates default resources: sdm gateways, ssh, mysql, and http. 
+```hcl
+module "strongdm_onboarding" {
+  source = "strongdm/onboarding/sdm"
+
+  # Prefix will be added to resource names
+  prefix = "foo"
+
+  # List of existing users to grant resources to
+  # NOTE: An error will occur if these users are already assigned to a role in strongDM
+  grant_to_existing_users = [
+    "admin@example.com",
+  ]
+
+  # New accounts to create with access to all resources
+  admin_users = [
+    "admin1@example.com",
+  ]
+}
+```
+
+#### Full feature options
+```hcl
 module "strongdm_onboarding" {
   source = "strongdm/onboarding/sdm"
 
@@ -81,6 +104,8 @@ module "strongdm_onboarding" {
   create_rdp               = true
   # HTTP resources take approximately 5 min
   create_http              = true
+  # SSH resources take approximately 5 min
+  create_ssh              = true
   # Kibana resources take approximately 15 min
   create_kibana            = true
   # Gateways take approximately 5 min
