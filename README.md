@@ -34,7 +34,7 @@ In the directory where you intend to run your terraform commands, create a `main
 
 ```tf
 terraform {
-  required_version = ">= 0.12.26"
+  required_version = "~> 0.12.26"
   required_providers {
     aws = ">= 3.0.0"
     sdm = ">= 1.0.12"
@@ -68,7 +68,7 @@ Create a `.tf` file (in this example, we called it `onboarding.tf`) and paste in
 
 ```tf
 module "strongdm_onboarding" {
-  source = "git::https://github.com/strongdm/terraform-sdm-onboarding.git"
+  source = "strongdm/onboarding/sdm"
 
   # Prefix will be added to resource names
   prefix = "foo"
