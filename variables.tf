@@ -15,7 +15,7 @@ variable create_eks {
 }
 variable create_mysql {
   type        = bool
-  default     = false
+  default     = true
   description = "Set to true to create an EC2 instance with mysql"
 }
 variable create_rdp {
@@ -25,7 +25,7 @@ variable create_rdp {
 }
 variable create_http {
   type        = bool
-  default     = false
+  default     = true
   description = "Set to true to create an EC2 instance with SSH and HTTP resources"
 }
 variable create_kibana {
@@ -35,7 +35,7 @@ variable create_kibana {
 }
 variable create_strongdm_gateways {
   type        = bool
-  default     = false
+  default     = true
   description = "Set to true to create a pair of strongDM gateways"
 }
 variable vpc_id {
