@@ -64,10 +64,12 @@ variable SDM_API_SECRET_KEY {}
 
 ### Customize the Terraform module
 
-Create a `.tf` file (in this example, we called it `onboarding.tf`) and paste in the module.
+Presented below are two options for your module - a minimal installion and a fully-featured one with more options to try out. Create a `.tf` file (in this example, we called it `onboarding.tf`) and paste in your desired module, then make any necessary adjustments. 
 
-#### Minimal install
-This install option creates default resources: sdm gateways, ssh, mysql, and http. 
+#### Minimal installation
+
+This install option creates only the default resources: sdm gateways, ssh, mysql, and http. It provides you with the necessities you need to get started trying out strongDM.
+
 ```hcl
 module "strongdm_onboarding" {
   source = "strongdm/onboarding/sdm"
@@ -88,7 +90,10 @@ module "strongdm_onboarding" {
 }
 ```
 
-#### Full feature options
+#### Fully-featured installation
+
+This install option creates many more resources and users than the minimal installation option does. It will take more time to provision, and consume more AWS resources, but will provide a more robust testing playground.
+
 ```hcl
 module "strongdm_onboarding" {
   source = "strongdm/onboarding/sdm"
