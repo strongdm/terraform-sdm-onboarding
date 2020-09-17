@@ -1,6 +1,6 @@
 # Create a strongDM Playground with Terraform
 
-It takes time and patience to set up and test databases, servers, websites, clusters, and gateways in order to see strongDM in action. If you prefer a simpler approach, use Terraform to spin up all of the necessary resources in AWS and set them up in your strongDM Admin UI. The Terraform script and this guide gets you up and running with a variety of users, resources, and gateways to help you to more quickly get hands-on experience and test out strongDM's capabilities.
+It takes time and effort to set up and test databases, servers, websites, clusters, and gateways in order to see strongDM in action. If you prefer a simpler approach, use Terraform to spin up all of the necessary resources in AWS and set them up in your strongDM Admin UI. This Terraform module gets you up and running with a variety of users, resources, and gateways to help you to more quickly get hands-on experience and test out strongDM's capabilities.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ It takes time and patience to set up and test databases, servers, websites, clus
 
 ## Setup
 
-In order to run the Terraform-powered creation of our strongDM playground, we need to create a few items:
+First, we need to create a few items:
 
 * A strongDM API key
 * A main configuration file for our Terraform project
@@ -22,11 +22,11 @@ In order to run the Terraform-powered creation of our strongDM playground, we ne
 
 ### Create a strongDM API key
 
-Go to your [strongDM Admin UI](https://app.strongdm.com/app/settings). Under **Settings** in the navigation menu, you will see that the first tab is titled **Admin Tokens**. Click **add api key**, give the key a name, and then give it relevant permissions. 
+Go to your <a href="https://app.strongdm.com/app/settings" target="_blank">strongDM Admin UI</a>. Under **Settings** in the navigation menu, you will see that the first tab is titled **Admin Tokens**. Click **add api key**, give the key a name, and then give it relevant permissions. 
 
 This script has the ability to create and destroy all of these categories of items. For the purposes of this demo, you might wish to grant the key access to all of these categories. There is an option to set the key to expire so that you don't forget to remove it later.
 
-Once you are shown the credentials, be sure to record them somewhere safe, as it will not show them to you again.
+Once you are shown the credentials, be sure to record them somewhere safe, as they will not be shown to you again.
 
 ### Terraform project configuration file
 
@@ -118,7 +118,7 @@ module "strongdm_onboarding" {
 * You can add a prefix (near the top) to the AWS resources, or add tags (at the bottom).
 * You may choose not to provision any of the resources listed by simply altering them to "false" (so for example, if you don't want EKS, you change the value from true to false: `create_eks = false`). In order to successfully test, you will need at least one or more resource(s) and the strongDM gateways.
 * You may also create strongDM users in various roles who will be automatically granted access to anything their role would grant them access to.
-* If the user(s) specified in the existing users array already have roles assigned to them, this will cause an error. You may remove those users temporarily from their other role, or create new users instead to use for the demo.
+* If the users specified in the existing users array already have roles assigned to them, this will cause an error. You may remove those users temporarily from their other role, or create new users instead to use for the demo.
 
 > **Note:** If you are using G Suite for an email provider, you may also create additional users without needing additional mailboxes quickly and easily by adding `+something` to the end of the username in the email address. Google will ignore this and deliver the mail to the same inbox, allowing you to create aliases for various purposes while still recieiving the mail in one place. So, to create several sample users, you could just make `yourusername+user1@example.com`, `yourusername+user2@example.com`, and `yourusername+user3@example.com`.
 
