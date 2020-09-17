@@ -77,6 +77,6 @@ resource "sdm_resource" "windows_server" {
 }
 resource "sdm_role_grant" "admin_grant_windows_server" {
   count = var.create_rdp ? 1 : 0
-  role_id = sdm_role.admins[0].id
+  role_id = sdm_role.admins.id
   resource_id = sdm_resource.windows_server[0].id
 }

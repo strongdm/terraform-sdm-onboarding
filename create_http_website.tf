@@ -63,12 +63,12 @@ resource "sdm_resource" "web_page" {
 }
 resource "sdm_role_grant" "admin_grant_web_page" {
   count = var.create_http ? 1 : 0
-  role_id = sdm_role.admins[0].id
+  role_id = sdm_role.admins.id
   resource_id = sdm_resource.web_page[0].id
 }
 resource "sdm_role_grant" "read_only_grant_web_page" {
   count = var.create_http ? 1 : 0
-  role_id = sdm_role.read_only[0].id
+  role_id = sdm_role.read_only.id
   resource_id = sdm_resource.web_page[0].id
 }
 # ---------------------------------------------------------------------------- #
@@ -87,6 +87,6 @@ resource "sdm_resource" "ssh_ec2" {
 }
 resource "sdm_role_grant" "admin_grant_ssh_ec2" {
   count = var.create_http ? 1 : 0
-  role_id = sdm_role.admins[0].id
+  role_id = sdm_role.admins.id
   resource_id = sdm_resource.ssh_ec2[0].id
 }

@@ -85,7 +85,7 @@ resource "sdm_resource" "mysql_admin" {
 }
 resource "sdm_role_grant" "admin_grant_mysql_admin" {
   count = var.create_mysql ? 1 : 0
-  role_id = sdm_role.admins[0].id
+  role_id = sdm_role.admins.id
   resource_id = sdm_resource.mysql_admin[0].id
 }
 resource "sdm_resource" "mysql_ro" {
@@ -103,7 +103,7 @@ resource "sdm_resource" "mysql_ro" {
 }
 resource "sdm_role_grant" "read_only_grant_mysql_ro" {
   count = var.create_mysql ? 1 : 0
-  role_id = sdm_role.read_only[0].id
+  role_id = sdm_role.read_only.id
   resource_id = sdm_resource.mysql_ro[0].id
 }
 # ---------------------------------------------------------------------------- #
@@ -122,6 +122,6 @@ resource "sdm_resource" "mysql_ssh" {
 }
 resource "sdm_role_grant" "admin_grant_mysql_ssh" {
   count = var.create_mysql ? 1 : 0
-  role_id = sdm_role.admins[0].id
+  role_id = sdm_role.admins.id
   resource_id = sdm_resource.mysql_ssh[0].id
 }

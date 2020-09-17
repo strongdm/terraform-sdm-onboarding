@@ -2,7 +2,6 @@
 # Create an admin role with permissions to all resources
 # ---------------------------------------------------------------------------- #
 resource "sdm_role" "admins" {
-  count = length(var.admin_users) > 0 ? 1:0
   name = "${var.prefix}-admin-role"
 }
 resource "sdm_account" "admin_users" {
@@ -36,7 +35,6 @@ resource "sdm_account_attachment" "existing_users" {
 # Create a limited access role with read only permissions
 # ---------------------------------------------------------------------------- #
 resource "sdm_role" "read_only" {
-  count = length(var.read_only_users) > 0 ? 1:0
   name = "${var.prefix}-read-only-role"
 }
 resource "sdm_account" "read_only_users" {
