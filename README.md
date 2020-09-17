@@ -69,7 +69,7 @@ Create a file (in this example, we called it `onboarding.tf`) and paste in the m
 
 ```tf
 module "strongdm_onboarding" {
-  source = "github.com/strongdm/terraform-sdm-onboarding"
+  source = "git::https://github.com/strongdm/terraform-sdm-onboarding.git"
 
   # Prefix will be added to resource names
   prefix = "foo"
