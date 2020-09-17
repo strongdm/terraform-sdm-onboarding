@@ -6,7 +6,6 @@ terraform {
     random     = ">= 2.0.0"
     local      = ">= 1.0.0"
     null       = ">= 2.0.0"
-    postgresql = ">= 1.5.0"
     kubernetes = ">= 1.11.0"
     template   = ">= 2.1.0"
   }
