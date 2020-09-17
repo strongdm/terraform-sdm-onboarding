@@ -65,11 +65,11 @@ variable SDM_API_SECRET_KEY {}
 
 ### Customize the Terraform module
 
-The full Terraform module script can be found [on GitHub](github.com/peteroneilljr/strongdm_onboarding). Create a file (in this example, we called it `onboarding.tf`) and paste in the module.
+Create a file (in this example, we called it `onboarding.tf`) and paste in the module.
 
 ```tf
 module "strongdm_onboarding" {
-  source = "github.com/peteroneilljr/strongdm_onboarding"
+  source = "github.com/strongdm/terraform-sdm-onboarding"
 
   # Prefix will be added to resource names
   prefix = "foo"
@@ -123,8 +123,6 @@ module "strongdm_onboarding" {
 
     **Note:** If you are using G Suite for an email provider, you may also create additional users without the additional mailboxes quickly and easily by adding `+something` to the end of the username in the email address. Google will ignore this and deliver the mail to the same inbox, allowing you to create aliases for various purposes while still recieiving the mail in one place. So, to create several sample users, you could just make `yourusername+user1@example.com`, `yourusername+user2@example.com`, and `yourusername+user3@example.com`.
     {: .note}
-
-Feel free to peruse the [full module on GitHub](https://github.com/peteroneilljr/strongdm_onboarding), customize it, clone it, and otherwise modify it as you see fit.
 
 ## Run the script
 
