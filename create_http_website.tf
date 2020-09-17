@@ -11,7 +11,7 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 resource "aws_instance" "web_page" {
-  count         = var.create_http ? 1 : 0
+  count         = var.create_http || var.create_ssh ? 1 : 0
   ami           = data.aws_ami.amazon_linux_2[0].id
   instance_type = "t3.micro"
 
@@ -75,10 +75,10 @@ resource "sdm_role_grant" "read_only_grant_web_page" {
 # Access the EC2 instance with strongDM over SSH
 # ---------------------------------------------------------------------------- #
 resource "sdm_resource" "ssh_ec2" {
-  count = var.create_http ? 1 : 0
+  count = var.create_ssh ? 1 : 0
   ssh_cert {
     # dependant on https://github.com/strongdm/issues/issues/1701
-    name     = "${var.prefix}-ssh-ca"
+    name     = "${var.prefix}-ssh-amzn2"
     username = "ec2-user"
     hostname = aws_instance.web_page[0].private_dns
     port     = 22
@@ -86,7 +86,7 @@ resource "sdm_resource" "ssh_ec2" {
   }
 }
 resource "sdm_role_grant" "admin_grant_ssh_ec2" {
-  count = var.create_http ? 1 : 0
+  count = var.create_ssh ? 1 : 0
   role_id = sdm_role.admins.id
   resource_id = sdm_resource.ssh_ec2[0].id
 }

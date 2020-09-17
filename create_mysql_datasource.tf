@@ -56,7 +56,7 @@ data "aws_ami" "ubuntu" {
   }
 }
 resource "aws_instance" "mysql" {
-  count         = var.create_mysql ? 1 : 0
+  count         = var.create_mysql || var.create_ssh ? 1 : 0
   ami           = data.aws_ami.ubuntu[0].id
   instance_type = "t3.small"
 
@@ -110,10 +110,10 @@ resource "sdm_role_grant" "read_only_grant_mysql_ro" {
 # Access the EC2 instance with strongDM over SSH
 # ---------------------------------------------------------------------------- #
 resource "sdm_resource" "mysql_ssh" {
-  count = var.create_mysql ? 1 : 0
+  count = var.create_ssh ? 1 : 0
   ssh_cert {
     # dependant on https://github.com/strongdm/issues/issues/1701
-    name     = "${var.prefix}-mysql-ssh"
+    name     = "${var.prefix}-ssh-ubuntu"
     username = "ubuntu"
     hostname = aws_instance.mysql[0].private_dns
     port     = 22
@@ -121,7 +121,7 @@ resource "sdm_resource" "mysql_ssh" {
   }
 }
 resource "sdm_role_grant" "admin_grant_mysql_ssh" {
-  count = var.create_mysql ? 1 : 0
+  count = var.create_ssh ? 1 : 0
   role_id = sdm_role.admins.id
   resource_id = sdm_resource.mysql_ssh[0].id
 }
