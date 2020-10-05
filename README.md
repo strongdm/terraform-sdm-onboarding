@@ -76,8 +76,9 @@ module "strongdm_onboarding" {
 
   prefix = "foo"
 
-  # Grant yourself access to the resources
-  # This account should currently be in NO ROLE in the Admin UI.
+  # List of existing users to grant resources to
+  # NOTE: These emails must exactly match existing users in strongDM or an error will occur
+  # NOTE: An error will occur if these users are already assigned to a role in strongDM
   grant_to_existing_users = [
     "admin@example.com",
   ]
@@ -116,6 +117,7 @@ module "strongdm_onboarding" {
 
 
   # List of existing users to grant resources to
+  # NOTE: These emails must exactly match existing users in strongDM or an error will occur
   # NOTE: An error will occur if these users are already assigned to a role in strongDM
   grant_to_existing_users = [
     "admin@example.com",
