@@ -25,7 +25,7 @@ module "eks_cluster" {
   worker_groups = [
     {
       instance_type = "t3.small"
-      asg_max_size  = 2
+      asg_max_size  = 1
     }
   ]
   providers = {
@@ -122,7 +122,7 @@ resource "sdm_resource" "k8s_eks_data_eks" {
   }
 }
 resource "sdm_role_grant" "admin_grant_eks" {
-  count = var.create_eks ? 1 : 0
-  role_id = sdm_role.admins.id
+  count       = var.create_eks ? 1 : 0
+  role_id     = sdm_role.admins.id
   resource_id = sdm_resource.k8s_eks_data_eks[0].id
 }

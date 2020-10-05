@@ -74,18 +74,12 @@ This install option creates only the default resources: sdm gateways, ssh, mysql
 module "strongdm_onboarding" {
   source = "strongdm/onboarding/sdm"
 
-  # Prefix will be added to resource names
   prefix = "foo"
 
-  # List of existing users to grant resources to
-  # NOTE: An error will occur if these users are already assigned to a role in strongDM
+  # Grant yourself access to the resources
+  # This account should currently be in NO ROLE in the Admin UI.
   grant_to_existing_users = [
     "admin@example.com",
-  ]
-
-  # New accounts to create with access to all resources
-  admin_users = [
-    "admin1@example.com",
   ]
 }
 ```
@@ -115,10 +109,11 @@ module "strongdm_onboarding" {
   create_kibana            = true
   # Gateways take approximately 5 min
   create_strongdm_gateways = true
+  
+  # VPC creation takes approximately 5 min
+  # If set to false the default VPC will be used instead
+  create_vpc = true
 
-  # Leave variables set to null to create resources in default VPC.
-  vpc_id     = null
-  subnet_ids = null
 
   # List of existing users to grant resources to
   # NOTE: An error will occur if these users are already assigned to a role in strongDM

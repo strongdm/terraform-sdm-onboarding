@@ -17,15 +17,15 @@ resource "aws_key_pair" "windows_key" {
 # ---------------------------------------------------------------------------- #
 resource "aws_security_group" "windows_server" {
   count       = var.create_rdp ? 1 : 0
-  name        = "${var.prefix}-terraform-security-group"
+  name_prefix = "${var.prefix}-windows-server"
   description = "allows 3389"
   vpc_id      = local.vpc_id
 
   ingress {
-    from_port   = 3389
-    to_port     = 3389
-    protocol    = "tcp"
-    cidr_blocks = [local.vpc_cidr_block]
+    from_port       = 3389
+    to_port         = 3389
+    protocol        = "tcp"
+    security_groups = [module.sdm.gateway_security_group_id]
   }
   egress {
     from_port   = 0
@@ -76,7 +76,7 @@ resource "sdm_resource" "windows_server" {
   }
 }
 resource "sdm_role_grant" "admin_grant_windows_server" {
-  count = var.create_rdp ? 1 : 0
-  role_id = sdm_role.admins.id
+  count       = var.create_rdp ? 1 : 0
+  role_id     = sdm_role.admins.id
   resource_id = sdm_resource.windows_server[0].id
 }

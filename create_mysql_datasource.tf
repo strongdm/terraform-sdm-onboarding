@@ -2,10 +2,10 @@
 # Local variables to create mysql database
 # ---------------------------------------------------------------------------- #
 locals {
-  username    = "strongdmadmin"
-  username_ro = "strongdmreadonly"
-  mysql_pw    = "strongdmpassword123!@#"
-  database    = "strongdmdb"
+  username        = "strongdmadmin"
+  username_ro     = "strongdmreadonly"
+  mysql_pw        = "strongdmpassword123!@#"
+  database        = "strongdmdb"
   mysql_user_data = <<-USERDATA
   #!/bin/bash
 
@@ -46,22 +46,57 @@ locals {
 # Create EC2 instance with mysql bootstrap script
 # ---------------------------------------------------------------------------- #
 data "aws_ami" "ubuntu" {
-  count         = var.create_mysql ? 1 : 0
+  count       = var.create_mysql || var.create_ssh ? 1 : 0
   most_recent = true
-  owners = ["099720109477"] # Canonical
+  owners      = ["099720109477"] # Canonical
 
   filter {
-      name   = "name"
-      values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
+}
+resource "aws_security_group" "mysql" {
+  count       = var.create_mysql || var.create_ssh ? 1 : 0
+  name_prefix = "${var.prefix}-mysql"
+  description = "allow inbound from strongDM gateway"
+  vpc_id      = local.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge({ Name = "${var.prefix}-mysql" }, local.default_tags, var.tags)
+}
+resource "aws_security_group_rule" "allow_mysql" {
+  count                    = var.create_mysql ? 1 : 0
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = module.sdm.gateway_security_group_id
+  security_group_id        = aws_security_group.mysql[0].id
+}
+resource "aws_security_group_rule" "allow_mysql_ssh" {
+  count                    = var.create_ssh ? 1 : 0
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = module.sdm.gateway_security_group_id
+  security_group_id        = aws_security_group.mysql[0].id
 }
 resource "aws_instance" "mysql" {
   count         = var.create_mysql || var.create_ssh ? 1 : 0
   ami           = data.aws_ami.ubuntu[0].id
   instance_type = "t3.small"
 
+  vpc_security_group_ids = [aws_security_group.mysql[0].id]
+
   subnet_id = local.subnet_ids[0]
-  
+
   user_data = local.mysql_user_data
 
   tags = merge({ Name = "${var.prefix}-mysql" }, local.default_tags, var.tags)
@@ -74,7 +109,7 @@ resource "sdm_resource" "mysql_admin" {
   count = var.create_mysql ? 1 : 0
   mysql {
     name     = "${var.prefix}-mysql-admin"
-    hostname = aws_instance.mysql[0].private_dns
+    hostname = aws_instance.mysql[0].private_ip
     database = local.database
     username = local.username
     password = local.mysql_pw
@@ -84,15 +119,15 @@ resource "sdm_resource" "mysql_admin" {
   }
 }
 resource "sdm_role_grant" "admin_grant_mysql_admin" {
-  count = var.create_mysql ? 1 : 0
-  role_id = sdm_role.admins.id
+  count       = var.create_mysql ? 1 : 0
+  role_id     = sdm_role.admins.id
   resource_id = sdm_resource.mysql_admin[0].id
 }
 resource "sdm_resource" "mysql_ro" {
   count = var.create_mysql ? 1 : 0
   mysql {
     name     = "${var.prefix}-mysql-read-only"
-    hostname = aws_instance.mysql[0].private_dns
+    hostname = aws_instance.mysql[0].private_ip
     database = local.database
     username = local.username_ro
     password = local.mysql_pw
@@ -102,8 +137,8 @@ resource "sdm_resource" "mysql_ro" {
   }
 }
 resource "sdm_role_grant" "read_only_grant_mysql_ro" {
-  count = var.create_mysql ? 1 : 0
-  role_id = sdm_role.read_only.id
+  count       = var.create_mysql ? 1 : 0
+  role_id     = sdm_role.read_only.id
   resource_id = sdm_resource.mysql_ro[0].id
 }
 # ---------------------------------------------------------------------------- #
@@ -115,13 +150,13 @@ resource "sdm_resource" "mysql_ssh" {
     # dependant on https://github.com/strongdm/issues/issues/1701
     name     = "${var.prefix}-ssh-ubuntu"
     username = "ubuntu"
-    hostname = aws_instance.mysql[0].private_dns
+    hostname = aws_instance.mysql[0].private_ip
     port     = 22
     tags     = merge({ Name = "${var.prefix}-mysql-ssh" }, local.default_tags, var.tags)
   }
 }
 resource "sdm_role_grant" "admin_grant_mysql_ssh" {
-  count = var.create_ssh ? 1 : 0
-  role_id = sdm_role.admins.id
+  count       = var.create_ssh ? 1 : 0
+  role_id     = sdm_role.admins.id
   resource_id = sdm_resource.mysql_ssh[0].id
 }
