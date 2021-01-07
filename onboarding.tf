@@ -1,5 +1,5 @@
 module "strongdm_onboarding" {
-  source = "strongdm/onboarding/sdm"
+  source = "./onboarding"
 
   # Prefix will be added to resource names
   prefix = "terraform-sdm"
