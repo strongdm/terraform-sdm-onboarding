@@ -18,7 +18,7 @@ resource "aws_ssm_parameter" "relay" {
   overwrite = true
   key_id    = var.encryption_key
 
-  tags = merge({ "Name" = "${sdm_node.relay[count.index].relay.0.name}" }, var.tags, )
+  tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
 
   depends_on = [aws_ssm_parameter.gateway]
 }
@@ -59,5 +59,5 @@ USERDATA
     create_before_destroy = true
   }
 
-  tags = merge({ "Name" = "${sdm_node.relay[count.index].relay.0.name}" }, var.tags, )
+  tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
 }

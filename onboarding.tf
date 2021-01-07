@@ -28,7 +28,7 @@ module "strongdm_onboarding" {
   # NOTE: These emails must exactly match existing users in strongDM or an error will occur
   # NOTE: An error will occur if these users are already assigned to a role in strongDM
    grant_to_existing_users = [
-     "${local.admin_user}",
+     local.admin_user,
    ]
 
   # New accounts to create with access to all resources

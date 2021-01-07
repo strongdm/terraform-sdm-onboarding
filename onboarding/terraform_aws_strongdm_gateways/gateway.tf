@@ -20,7 +20,7 @@ resource "aws_ssm_parameter" "gateway" {
   overwrite = true
   key_id    = var.encryption_key
 
-  tags = merge({ "Name" = "${sdm_node.gateway[count.index].gateway.0.name}" }, var.tags, )
+  tags = merge({ "Name" = sdm_node.gateway[count.index].gateway.0.name }, var.tags, )
 }
 
 #################
@@ -77,5 +77,5 @@ USERDATA
     # create_before_destroy = true
   }
 
-  tags = merge({ "Name" = "${sdm_node.gateway[count.index].gateway.0.name}" }, var.tags, )
+  tags = merge({ "Name" = sdm_node.gateway[count.index].gateway.0.name }, var.tags, )
 }
