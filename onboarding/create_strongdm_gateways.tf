@@ -1,5 +1,5 @@
 module "sdm" {
-  source        = "github.com/peteroneilljr/terraform_aws_strongdm_gateways"
+  source        = "./terraform_aws_strongdm_gateways"
   enable_module = var.create_strongdm_gateways
 
   sdm_node_name = "${var.prefix}-gateway"
