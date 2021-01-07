@@ -25,7 +25,7 @@ variable create_rdp {
 }
 variable create_http {
   type        = bool
-  default     = true
+  default     = false
   description = "Set to true to create an EC2 instance with HTTP resources"
 }
 variable create_ssh {

@@ -11,7 +11,7 @@ module "strongdm_onboarding" {
   # RDP resources take approximately 10 min
   # create_rdp               = true
   # HTTP resources take approximately 5 min
-  # create_http              = true
+  # create_http              = false
   # SSH resources take approximately 5 min
   # create_ssh              = true
   # Kibana resources take approximately 15 min
