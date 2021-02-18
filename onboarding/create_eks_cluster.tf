@@ -26,6 +26,7 @@ module "eks_cluster" {
     {
       instance_type = "t3.small"
       asg_max_size  = 1
+      root_volume_type = "gp2"
     }
   ]
   providers = {
@@ -47,7 +48,7 @@ data "aws_eks_cluster_auth" "eks_data" {
 provider "kubernetes" {
   alias = "eks"
 
-  version          = "~> 1.11"
+  #version          = "~> 1.11"
   load_config_file = false
 
   host                   = var.create_eks ? data.aws_eks_cluster.eks_data[0].endpoint : null
