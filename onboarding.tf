@@ -11,6 +11,7 @@ module "strongdm_onboarding" {
   # RDP resources take approximately 10 min
   # create_rdp               = true
   # HTTP resources take approximately 5 min
+  # NOTE: Before creating HTTP resources, set up TLS here https://app.strongdm.com/app/datasources/websites
   # create_http              = false
   # SSH resources take approximately 5 min
   # create_ssh              = true
