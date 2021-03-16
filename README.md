@@ -4,7 +4,7 @@ This Terraform module gets you up and running with strongDM quickly, with a vari
 
 ## Prerequisites
 
-* A strongDM account (if you don't have one, [sign up here](https://www.strongdm.com/signup-contact/)) and a strongDM API key, which can be generated in the <a href="https://app.strongdm.com/app/settings" target="_blank">strongDM Admin UI</a>.
+* A strongDM account (if you don't have one, [sign up here](https://www.strongdm.com/signup-contact/)) and a strongDM API key, which can be generated in the <a href="https://app.strongdm.com/app/settings" target="_blank">strongDM Admin UI</a>. Your strongDM API key will need all permissions granted to it in order to generate the users and resources for this script.
 * [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v0.12.26 or higher installed on your computer.
 * An Amazon Web Services (AWS) account and an API key with permissions sufficient to provision all of the resources you intend to provision ([AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) > Key Pairs).
 
