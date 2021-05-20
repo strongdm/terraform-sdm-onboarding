@@ -47,7 +47,6 @@ data "aws_eks_cluster_auth" "eks_data" {
 provider "kubernetes" {
   alias = "eks"
 
-  version          = "~> 1.11"
   load_config_file = false
 
   host                   = var.create_eks ? data.aws_eks_cluster.eks_data[0].endpoint : null

@@ -19,7 +19,7 @@ module "strongdm_onboarding" {
   # create_kibana            = true
   # Gateways take approximately 5 min
   # create_strongdm_gateways = true
-  
+
   # VPC creation takes approximately 5 min
   # If set to false the default VPC will be used instead
   # create_vpc = true
@@ -28,9 +28,9 @@ module "strongdm_onboarding" {
   # List of existing users to grant resources to
   # NOTE: These emails must exactly match existing users in strongDM or an error will occur
   # NOTE: An error will occur if these users are already assigned to a role in strongDM
-   grant_to_existing_users = [
-     local.admin_user,
-   ]
+  grant_to_existing_users = [
+    var.SDM_ADMIN_USER
+  ]
 
   # New accounts to create with access to all resources
   # admin_users = [
