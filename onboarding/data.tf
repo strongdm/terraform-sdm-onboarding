@@ -11,13 +11,6 @@ data "aws_subnet_ids" "subnets" {
   vpc_id = data.aws_vpc.default[0].id
 }
 
-locals {
-  vpc_id         = var.create_vpc ? module.vpc.vpc_id : data.aws_vpc.default[0].id
-  vpc_cidr_block = var.create_vpc ? module.vpc.vpc_cidr_block : data.aws_vpc.default[0].cidr_block
-  subnet_ids     = var.create_vpc ? module.vpc.public_subnets : sort(data.aws_subnet_ids.subnets[0].ids)
-  default_tags   = { CreatedBy = "strongDM-Onboarding" }
-}
-
 # ---------------------------------------------------------------------------- #
 # Grab the strongDM CA public key for the authenticated organization
 # ---------------------------------------------------------------------------- #
