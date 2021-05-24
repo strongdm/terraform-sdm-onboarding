@@ -47,8 +47,6 @@ data "aws_eks_cluster_auth" "eks_data" {
 provider "kubernetes" {
   alias = "eks"
 
-  load_config_file = false
-
   host                   = var.create_eks ? data.aws_eks_cluster.eks_data[0].endpoint : null
   cluster_ca_certificate = var.create_eks ? base64decode(data.aws_eks_cluster.eks_data[0].certificate_authority.0.data) : null
   token                  = var.create_eks ? data.aws_eks_cluster_auth.eks_data[0].token : null
