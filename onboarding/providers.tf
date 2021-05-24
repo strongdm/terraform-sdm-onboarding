@@ -3,8 +3,8 @@ terraform {
   required_providers {
     aws        = ">= 3.0.0"
     sdm        = {
-      source = "strongdm/sdm"
-      version = ">= 1.0.12"
+      source  = "strongdm/sdm"
+      version = ">= 1.0.15"
     }
     random     = ">= 2.0.0"
     local      = ">= 1.0.0"
