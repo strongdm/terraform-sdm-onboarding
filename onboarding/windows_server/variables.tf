@@ -4,4 +4,4 @@ variable "security_group" {}
 variable "tags" {}
 variable "default_tags" {}
 variable "subnet_ids" {}
-variable "admin_id" {}
+variable "admins_id" {}
