@@ -1,21 +1,26 @@
+terraform {
+  required_version = ">= 0.14.0"
+  required_providers {
+    aws = ">= 3.0.0"
+    sdm = {
+      source  = "strongdm/sdm"
+      version = ">= 1.0.15"
+    }
+    kubernetes = ">= 2.0.0"
+  }
+}
+
 # ---------------------------------------------------------------------------- #
 # Create EKS cluster
 # ---------------------------------------------------------------------------- #
+
 locals {
-  rolearn = aws_iam_role.eks_role.arn
+  rolearn = var.create_eks ? aws_iam_role.eks_role[0].arn : "rolearn/rolearn"
 }
-
-data "aws_eks_cluster" "eks_data" {
-  name = module.eks_cluster.cluster_id
-}
-
-data "aws_eks_cluster_auth" "eks_data" {
-  name = module.eks_cluster.cluster_id
-}
-
 
 module "eks_cluster" {
-  source = "terraform-aws-modules/eks/aws"
+  source     = "terraform-aws-modules/eks/aws"
+  create_eks = var.create_eks
   # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/12.2.0
 
   cluster_name    = "${var.prefix}-eks"
@@ -24,7 +29,7 @@ module "eks_cluster" {
   vpc_id          = var.vpc_id
 
   map_roles = [{
-    # This role will be added to the aws_auth file and strongDM will use these credentials. 
+    # This role will be added to the aws_auth file and strongDM will use these credentials.
     rolearn  = local.rolearn
     username = split("/", local.rolearn)[length(split("/", local.rolearn)) - 1]
     groups   = ["system:masters"]
@@ -36,6 +41,7 @@ module "eks_cluster" {
       asg_max_size  = 1
     }
   ]
+
   providers = {
     kubernetes = kubernetes.eks
   }
@@ -46,12 +52,22 @@ module "eks_cluster" {
 # Grant control of EKS to Terraform to add aws_auth file
 # ---------------------------------------------------------------------------- #
 
+data "aws_eks_cluster" "eks_data" {
+  count = var.create_eks ? 1 : 0
+  name  = module.eks_cluster.cluster_id
+}
+
+data "aws_eks_cluster_auth" "eks_data" {
+  count = var.create_eks ? 1 : 0
+  name  = module.eks_cluster.cluster_id
+}
+
 provider "kubernetes" {
   alias = "eks"
 
-  host                   = data.aws_eks_cluster.eks_data.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks_data.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.eks_data.token
+  host                   = var.create_eks ? data.aws_eks_cluster.eks_data[0].endpoint : null
+  cluster_ca_certificate = var.create_eks ? base64decode(data.aws_eks_cluster.eks_data[0].certificate_authority.0.data) : null
+  token                  = var.create_eks ? data.aws_eks_cluster_auth.eks_data[0].token : null
 }
 
 # ---------------------------------------------------------------------------- #
@@ -60,8 +76,9 @@ provider "kubernetes" {
 
 resource "aws_iam_user" "eks_user" {
   # This user is not granted any permissions.
-  name = "${var.prefix}-eks-user-strongdm"
-  path = "/terraform/"
+  count = var.create_eks ? 1 : 0
+  name  = "${var.prefix}-eks-user-strongdm"
+  path  = "/terraform/"
   tags = merge({
     Name = "${var.prefix}-eks"
   }, var.default_tags, var.tags)
@@ -69,12 +86,14 @@ resource "aws_iam_user" "eks_user" {
 
 resource "aws_iam_access_key" "eks_user" {
   # An access key is created for the IAM user generate an iam-authenticator token.
-  user = aws_iam_user.eks_user.name
+  count = var.create_eks ? 1 : 0
+  user  = aws_iam_user.eks_user[0].name
 }
 
 resource "aws_iam_role" "eks_role" {
   # This role is listed inside the EKS cluster and is where strongDM will inherit permissions.
-  name = "${var.prefix}-eks-user-strongdm"
+  count = var.create_eks ? 1 : 0
+  name  = "${var.prefix}-eks-user-strongdm"
 
   # This policy restricts this role so it can only be used by the IAM user created above.
   assume_role_policy = <<EOF
@@ -86,7 +105,7 @@ resource "aws_iam_role" "eks_role" {
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "${aws_iam_user.eks_user.arn}"
+          "${aws_iam_user.eks_user[0].arn}"
         ]
       },
       "Action": "sts:AssumeRole"
@@ -101,21 +120,22 @@ EOF
 # ---------------------------------------------------------------------------- #
 
 resource "sdm_resource" "k8s_eks_data_eks" {
+  count = var.create_eks ? 1 : 0
   amazon_eks {
     name         = "${var.prefix}-eks"
-    cluster_name = data.aws_eks_cluster.eks_data.name
+    cluster_name = data.aws_eks_cluster.eks_data[0].name
 
-    endpoint = split("//", data.aws_eks_cluster.eks_data.endpoint)[1]
-    region   = split(".", data.aws_eks_cluster.eks_data.endpoint)[2]
+    endpoint = split("//", data.aws_eks_cluster.eks_data[0].endpoint)[1]
+    region   = split(".", data.aws_eks_cluster.eks_data[0].endpoint)[2]
 
-    certificate_authority = base64decode(data.aws_eks_cluster.eks_data.certificate_authority.0.data)
+    certificate_authority = base64decode(data.aws_eks_cluster.eks_data[0].certificate_authority.0.data)
 
     # IAM Credentials are used to access the cluster via iam-authenticator
-    access_key        = aws_iam_access_key.eks_user.id
-    secret_access_key = aws_iam_access_key.eks_user.secret
+    access_key        = aws_iam_access_key.eks_user[0].id
+    secret_access_key = aws_iam_access_key.eks_user[0].secret
 
-    # When specified strongDM will inherit permissions from this role 
-    role_arn = aws_iam_role.eks_role.arn
+    # When specified strongDM will inherit permissions from this role
+    role_arn = aws_iam_role.eks_role[0].arn
     tags = merge({
       Name = "${var.prefix}-eks"
     }, var.default_tags, var.tags)
@@ -123,6 +143,7 @@ resource "sdm_resource" "k8s_eks_data_eks" {
 }
 
 resource "sdm_role_grant" "admin_grant_eks" {
+  count       = var.create_eks ? 1 : 0
   role_id     = var.admins_id
-  resource_id = sdm_resource.k8s_eks_data_eks.id
+  resource_id = sdm_resource.k8s_eks_data_eks[0].id
 }

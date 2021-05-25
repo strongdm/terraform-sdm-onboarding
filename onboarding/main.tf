@@ -10,9 +10,9 @@ module "windows_server" {
   admins_id      = sdm_role.admins.id
 }
 
-module "eks_cluster" {
-  count        = var.create_eks ? 1 : 0
+module "eks" {
   source       = "./eks_cluster"
+  create_eks   = var.create_eks
   prefix       = var.prefix
   subnet_ids   = local.subnet_ids
   vpc_id       = local.vpc_id
