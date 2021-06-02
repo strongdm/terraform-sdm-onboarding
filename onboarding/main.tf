@@ -20,3 +20,18 @@ module "eks" {
   tags         = var.tags
   admins_id    = sdm_role.admins.id
 }
+
+module "mysql" {
+  count          = var.create_mysql ? 1 : 0
+  source         = "./mysql"
+  create_ssh     = var.create_ssh
+  ssh_pubkey     = data.sdm_ssh_ca_pubkey.this_key.public_key
+  prefix         = var.prefix
+  vpc_id         = local.vpc_id
+  tags           = var.tags
+  default_tags   = local.default_tags
+  security_group = module.sdm.gateway_security_group_id
+  subnet_ids     = local.subnet_ids
+  admins_id      = sdm_role.admins.id
+  read_only_id   = sdm_role.read_only.id
+}
