@@ -16,11 +16,11 @@ output "sdm_relay_ids" {
     instance.tags.Name => instance.id
   }
 }
-output gateway_security_group_id {
+output "gateway_security_group_id" {
   value       = local.create_gateway ? aws_security_group.this["gateway"].id : "No security group defined"
   description = "The ID of the gateway security group if created"
 }
-output relay_security_group_id {
+output "relay_security_group_id" {
   value       = local.create_relay ? aws_security_group.this["relay"].id : "No security group defined"
   description = "The ID of the relay security group if created"
 }

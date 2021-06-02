@@ -1,3 +1,19 @@
+terraform {
+  required_version = ">= 0.12.26"
+  required_providers {
+    aws = ">= 3.0.0"
+    sdm = {
+      source  = "strongdm/sdm"
+      version = ">= 1.0.12"
+    }
+    random     = ">= 2.0.0"
+    local      = ">= 1.0.0"
+    null       = ">= 2.0.0"
+    kubernetes = ">= 1.11.0"
+    template   = ">= 2.1.0"
+  }
+}
+
 #################
 # Create strongDM gateway and store token
 #################
@@ -24,7 +40,7 @@ resource "aws_ssm_parameter" "gateway" {
 }
 
 #################
-# Instance configuration 
+# Instance configuration
 #################
 resource "aws_eip" "gateway" {
   count             = local.gateway_count
@@ -72,10 +88,76 @@ USERDATA
     # Prevents Instance from respawning when Amazon Linux 2 is updated
     ignore_changes = [ami]
 
-    # Used to prevent EIP from failing to associate 
+    # Used to prevent EIP from failing to associate
     # https://github.com/terraform-providers/terraform-provider-aws/issues/2689
     # create_before_destroy = true
   }
 
   tags = merge({ "Name" = sdm_node.gateway[count.index].gateway.0.name }, var.tags, )
+}
+
+#### RELAY
+
+#################
+# Create strongDM gateway and store token
+#################
+resource "sdm_node" "relay" {
+  count = local.relay_count
+
+  relay {
+    name = "${var.sdm_node_name}-relay-${count.index}"
+  }
+}
+resource "aws_ssm_parameter" "relay" {
+  count = local.relay_count
+
+  type  = "SecureString"
+  value = sdm_node.relay[count.index].relay.0.token
+  name  = "/strongdm/relay/${sdm_node.relay[count.index].relay.0.name}/token"
+
+  overwrite = true
+  key_id    = var.encryption_key
+
+  tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
+
+  depends_on = [aws_ssm_parameter.gateway]
+}
+#################
+# Instance configuration
+#################
+resource "aws_instance" "relay" {
+  count = local.relay_count
+
+  ami           = data.aws_ami.amazon_linux_2.image_id
+  instance_type = var.dev_mode ? "t3.micro" : "t3.medium"
+
+  user_data = <<USERDATA
+#!/bin/bash -xe
+curl -J -O -L https://app.strongdm.com/releases/cli/linux && unzip sdmcli* && rm -f sdmcli*
+sudo ./sdm install --relay --token="${aws_ssm_parameter.relay[count.index].value}"
+USERDATA
+
+  key_name   = var.ssh_key
+  monitoring = var.detailed_monitoiring
+
+  credit_specification {
+    # Prevents CPU throttling and potential performance issues with Gateway
+    cpu_credits = "unlimited"
+  }
+
+  # Relay Attributes
+  subnet_id              = var.relay_subnet_ids[count.index]
+  vpc_security_group_ids = [aws_security_group.this["relay"].id]
+
+  lifecycle {
+
+    # Prevents Instance from respawning when Amazon Linux 2 is updated
+    ignore_changes = [ami]
+
+    # Used to prevent EIP from failing to associate
+    # https://github.com/terraform-providers/terraform-provider-aws/issues/2689
+    create_before_destroy = true
+  }
+
+  tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
 }

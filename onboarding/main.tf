@@ -19,7 +19,7 @@ module "windows_server" {
   source         = "./windows_server"
   default_tags   = local.default_tags
   prefix         = var.prefix
-  security_group = module.sdm.gateway_security_group_id
+  security_group = module.sdm[0].gateway_security_group_id
   subnet_ids     = local.subnet_ids[0]
   tags           = var.tags
   vpc_id         = local.vpc_id
@@ -46,7 +46,7 @@ module "mysql" {
   vpc_id         = local.vpc_id
   tags           = var.tags
   default_tags   = local.default_tags
-  security_group = module.sdm.gateway_security_group_id
+  security_group = module.sdm[0].gateway_security_group_id
   subnet_ids     = local.subnet_ids
   admins_id      = sdm_role.admins.id
   read_only_id   = sdm_role.read_only.id
@@ -60,9 +60,21 @@ module "http_website" {
   vpc_id         = local.vpc_id
   tags           = var.tags
   default_tags   = local.default_tags
-  security_group = module.sdm.gateway_security_group_id
+  security_group = module.sdm[0].gateway_security_group_id
   subnet_ids     = local.subnet_ids
   ssh_pubkey     = data.sdm_ssh_ca_pubkey.this_key.public_key
   admins_id      = sdm_role.admins.id
   read_only_id   = sdm_role.read_only.id
+}
+
+module "sdm" {
+  count         = var.create_strongdm_gateways ? 1 : 0
+  source        = "./sdm_gateway"
+  sdm_node_name = "${var.prefix}-gateway"
+  deploy_vpc_id = local.vpc_id
+  gateway_subnet_ids = [
+    local.subnet_ids[0],
+    local.subnet_ids[1]
+  ]
+  tags = merge(local.default_tags, var.tags)
 }
