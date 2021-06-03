@@ -77,8 +77,8 @@ variable "read_only_users" {
 }
 
 locals {
-  vpc_id         = var.create_vpc ? module.vpc.vpc_id : data.aws_vpc.default[0].id
-  vpc_cidr_block = var.create_vpc ? module.vpc.vpc_cidr_block : data.aws_vpc.default[0].cidr_block
-  subnet_ids     = var.create_vpc ? module.vpc.public_subnets : sort(data.aws_subnet_ids.subnets[0].ids)
+  vpc_id         = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
+  vpc_cidr_block = var.create_vpc ? module.network[0].vpc_cidr_block : data.aws_vpc.default[0].cidr_block
+  subnet_ids     = var.create_vpc ? module.network[0].public_subnets : sort(data.aws_subnet_ids.subnets[0].ids)
   default_tags   = { CreatedBy = "strongDM-Onboarding" }
 }
