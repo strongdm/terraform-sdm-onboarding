@@ -14,6 +14,14 @@ terraform {
   }
 }
 
+module "network" {
+  count        = var.create_vpc ? 1 : 0
+  source       = "./network"
+  prefix       = var.prefix
+  default_tags = local.default_tags
+  tags         = var.tags
+}
+
 module "windows_server" {
   count          = var.create_rdp ? 1 : 0
   source         = "./windows_server"
