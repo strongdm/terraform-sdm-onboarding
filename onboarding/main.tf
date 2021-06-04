@@ -31,7 +31,6 @@ module "sdm" {
 
 
 module "windows_server" {
-  depends_on     = [module.sdm]
   count          = var.create_rdp ? 1 : 0
   source         = "./windows_server"
   default_tags   = local.default_tags
@@ -55,7 +54,6 @@ module "eks" {
 }
 
 module "mysql" {
-  depends_on     = [module.sdm]
   count          = var.create_mysql ? 1 : 0
   source         = "./mysql"
   create_ssh     = var.create_ssh
@@ -71,7 +69,6 @@ module "mysql" {
 }
 
 module "http_website" {
-  depends_on     = [module.sdm]
   count          = var.create_http ? 1 : 0
   source         = "./http"
   create_ssh     = var.create_ssh
