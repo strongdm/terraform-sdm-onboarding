@@ -3,19 +3,27 @@ variable "SDM_API_ACCESS_KEY" {
   type      = string
   sensitive = true
 }
+
 variable "SDM_API_SECRET_KEY" {
   type      = string
   sensitive = true
 }
-variable "SDM_ADMIN_USER" {}
+
+variable "SDM_ADMIN_USER" {
+  type = string
+}
 
 ### AWS ###
 variable "AWS_ACCESS_KEY_ID" {
   type      = string
   sensitive = true
 }
+
 variable "AWS_SECRET_ACCESS_KEY" {
   type      = string
   sensitive = true
 }
-variable "AWS_REGION" {}
+
+variable "REGION_AWS" {
+  type = string
+}
