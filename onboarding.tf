@@ -15,8 +15,6 @@ module "strongdm_onboarding" {
   # create_http              = false
   # SSH resources take approximately 5 min
   # create_ssh              = true
-  # Kibana resources take approximately 15 min
-  # create_kibana            = true
   # Gateways take approximately 5 min
   # create_strongdm_gateways = true
 

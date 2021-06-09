@@ -40,12 +40,6 @@ variable "create_ssh" {
   description = "Set to true to create an EC2 instances with SSH access"
 }
 
-variable "create_kibana" {
-  type        = bool
-  default     = false
-  description = "Set to true to create an ElasticSearch cluster and Kibana dashboard"
-}
-
 variable "create_strongdm_gateways" {
   type        = bool
   default     = true
