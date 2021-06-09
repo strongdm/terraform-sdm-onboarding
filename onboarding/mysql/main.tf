@@ -18,6 +18,7 @@ locals {
   username_ro     = "strongdmreadonly"
   mysql_pw        = "strongdmpassword123!@#"
   database        = "strongdmdb"
+  table_name      = "strongdm_table"
   mysql_user_data = <<-USERDATA
   #!/bin/bash
 
@@ -45,6 +46,8 @@ locals {
   sudo mysql --user=root \
     --password=${local.mysql_pw} \
     --execute="CREATE DATABASE ${local.database};\
+    CREATE TABLE ${local.database}.${local.table_name} (message VARCHAR(20));\
+    INSERT INTO ${local.database}.${local.table_name} VALUES ('Hello');\
     CREATE USER '${local.username}'@'%' IDENTIFIED BY '${local.mysql_pw}';\
     GRANT ALL PRIVILEGES ON *.* TO '${local.username}'@'%';\
     CREATE USER '${local.username_ro}'@'%' IDENTIFIED BY '${local.mysql_pw}';\
