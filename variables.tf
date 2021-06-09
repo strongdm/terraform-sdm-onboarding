@@ -9,7 +9,7 @@ variable "SDM_API_SECRET_KEY" {
   sensitive = true
 }
 
-variable "SDM_ADMIN_USER" {
+variable "SDM_ADMINS_EMAILS" {
   type = string
 }
 
