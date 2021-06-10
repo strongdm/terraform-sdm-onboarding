@@ -31,18 +31,14 @@ module "strongdm_onboarding" {
   ]
 
   # New accounts to create with access to all resources
-  # admin_users = [
-  #   "admin1@example.com", 
-  #   "admin2@example.com", 
-  #   "admin3@example.com", 
-  # ]
+  admin_users = [
+    "terraform-admin@example.com",
+  ]
 
   # New accounts to create with read-only permissions
-  # read_only_users = [
-  #   "user1@example.com",
-  #   "user2@example.com",
-  #   "user3@example.com",
-  # ]
+  read_only_users = [
+    "terraform-user@example.com",
+  ]
 
   # Tags will be added to strongDM and AWS resources.
   # tags = {}
