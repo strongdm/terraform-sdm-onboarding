@@ -1,8 +1,19 @@
+terraform {
+  required_version = ">= 0.14.0"
+  required_providers {
+    aws = ">= 3.0.0"
+    sdm = {
+      source  = "strongdm/sdm"
+      version = ">= 1.0.15"
+    }
+  }
+}
+
 # ---------------------------------------------------------------------------- #
 # Create an EC2 instance
 # ---------------------------------------------------------------------------- #
 data "aws_ami" "amazon_linux_2" {
-  count       = var.create_http || var.create_ssh ? 1 : 0
+  count       = var.create_ssh ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
   filter {
@@ -11,10 +22,10 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 resource "aws_security_group" "web_page" {
-  count       = var.create_http || var.create_ssh ? 1 : 0
+  count       = var.create_ssh ? 1 : 0
   name_prefix = "${var.prefix}-web-page"
   description = "allow inbound from strongDM gateway"
-  vpc_id      = local.vpc_id
+  vpc_id      = var.vpc_id
 
   egress {
     from_port   = 0
@@ -23,15 +34,14 @@ resource "aws_security_group" "web_page" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ Name = "${var.prefix}-http" }, local.default_tags, var.tags)
+  tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
 }
 resource "aws_security_group_rule" "allow_80" {
-  count                    = var.create_http ? 1 : 0
   type                     = "ingress"
   from_port                = 80
   to_port                  = 80
   protocol                 = "tcp"
-  source_security_group_id = module.sdm.gateway_security_group_id
+  source_security_group_id = var.security_group
   security_group_id        = aws_security_group.web_page[0].id
 }
 resource "aws_security_group_rule" "allow_http_ssh" {
@@ -40,15 +50,15 @@ resource "aws_security_group_rule" "allow_http_ssh" {
   from_port                = 22
   to_port                  = 22
   protocol                 = "tcp"
-  source_security_group_id = module.sdm.gateway_security_group_id
+  source_security_group_id = var.security_group
   security_group_id        = aws_security_group.web_page[0].id
 }
 resource "aws_instance" "web_page" {
-  count         = var.create_http || var.create_ssh ? 1 : 0
+  count         = var.create_ssh ? 1 : 0
   ami           = data.aws_ami.amazon_linux_2[0].id
   instance_type = "t3.micro"
 
-  subnet_id              = local.subnet_ids[1]
+  subnet_id              = var.subnet_ids[1]
   vpc_security_group_ids = [aws_security_group.web_page[0].id]
 
   # Configures a simple HTTP web page 
@@ -57,7 +67,7 @@ resource "aws_instance" "web_page" {
 
   # add sdm public key
   cat <<SDM_KEY | tee /etc/ssh/sdm_ca.pub
-  ${data.sdm_ssh_ca_pubkey.this_key.public_key}
+  ${var.ssh_pubkey}
   SDM_KEY
   cat <<SDM_TRUST | sudo tee -a /etc/ssh/sshd_config
   TrustedUserCAKeys /etc/ssh/sdm_ca.pub
@@ -78,13 +88,12 @@ resource "aws_instance" "web_page" {
   echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
   EOF
 
-  tags = merge({ Name = "${var.prefix}-http" }, local.default_tags, var.tags)
+  tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
 }
 # ---------------------------------------------------------------------------- #
 # Add the web page to strongDM
 # ---------------------------------------------------------------------------- #
 resource "sdm_resource" "web_page" {
-  count = var.create_http ? 1 : 0
   http_no_auth {
     name             = "${var.prefix}-http"
     url              = "http://${aws_instance.web_page[0].private_ip}"
@@ -92,18 +101,16 @@ resource "sdm_resource" "web_page" {
     healthcheck_path = "/phpinfo.php"
     subdomain        = "simple-web-page"
 
-    tags = merge({ Name = "${var.prefix}-http" }, local.default_tags, var.tags)
+    tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
   }
 }
 resource "sdm_role_grant" "admin_grant_web_page" {
-  count       = var.create_http ? 1 : 0
-  role_id     = sdm_role.admins.id
-  resource_id = sdm_resource.web_page[0].id
+  role_id     = var.admins_id
+  resource_id = sdm_resource.web_page.id
 }
 resource "sdm_role_grant" "read_only_grant_web_page" {
-  count       = var.create_http ? 1 : 0
-  role_id     = sdm_role.read_only.id
-  resource_id = sdm_resource.web_page[0].id
+  role_id     = var.read_only_id
+  resource_id = sdm_resource.web_page.id
 }
 # ---------------------------------------------------------------------------- #
 # Access the EC2 instance with strongDM over SSH
@@ -116,11 +123,11 @@ resource "sdm_resource" "ssh_ec2" {
     username = "ec2-user"
     hostname = aws_instance.web_page[0].private_ip
     port     = 22
-    tags     = merge({ Name = "${var.prefix}-http" }, local.default_tags, var.tags)
+    tags     = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
   }
 }
 resource "sdm_role_grant" "admin_grant_ssh_ec2" {
   count       = var.create_ssh ? 1 : 0
-  role_id     = sdm_role.admins.id
+  role_id     = var.admins_id
   resource_id = sdm_resource.ssh_ec2[0].id
 }

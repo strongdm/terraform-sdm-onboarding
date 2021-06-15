@@ -62,12 +62,6 @@ variable "enable_cpu_alarm" {
   type        = bool
   default     = false
 }
-variable "enable_module" {
-  description = "Optional creation for module"
-  type        = bool
-  default     = true
-}
-
 
 #################
 # Sources latest Amazon Linux 2 AMI ID
@@ -92,7 +86,7 @@ locals {
   create_relay   = local.relay_count > 0 ? true : false
   create_gateway = local.gateway_count > 0 ? true : false
 
-  gateway_count = var.enable_module ? length(var.gateway_subnet_ids) : 0
-  relay_count   = var.enable_module ? length(var.relay_subnet_ids) : 0
+  gateway_count = length(var.gateway_subnet_ids)
+  relay_count   = length(var.relay_subnet_ids)
   node_count    = local.gateway_count + local.relay_count
 }
