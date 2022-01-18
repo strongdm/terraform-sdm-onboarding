@@ -6,7 +6,6 @@ terraform {
       source  = "strongdm/sdm"
       version = ">= 1.0.15"
     }
-    kubernetes = ">= 2.0.0"
   }
 }
 
@@ -18,33 +17,14 @@ locals {
   rolearn = var.create_eks ? aws_iam_role.eks_role[0].arn : "rolearn/rolearn"
 }
 
-module "eks_cluster" {
+module "eks" {
   source     = "terraform-aws-modules/eks/aws"
-  create_eks = var.create_eks
-  # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/12.2.0
-
+  create = var.create_eks
   cluster_name    = "${var.prefix}-eks"
-  cluster_version = "1.17"
-  subnets         = var.subnet_ids
+  cluster_version = "1.21"
+  subnet_ids      = var.subnet_ids
   vpc_id          = var.vpc_id
 
-  map_roles = [{
-    # This role will be added to the aws_auth file and strongDM will use these credentials.
-    rolearn  = local.rolearn
-    username = split("/", local.rolearn)[length(split("/", local.rolearn)) - 1]
-    groups   = ["system:masters"]
-  }]
-
-  worker_groups = [
-    {
-      instance_type = "t3.small"
-      asg_max_size  = 1
-    }
-  ]
-
-  providers = {
-    kubernetes = kubernetes.eks
-  }
   tags = merge({ Name = "${var.prefix}-eks" }, var.default_tags, var.tags)
 }
 
@@ -54,21 +34,20 @@ module "eks_cluster" {
 
 data "aws_eks_cluster" "eks_data" {
   count = var.create_eks ? 1 : 0
-  name  = module.eks_cluster.cluster_id
+  name  = module.eks.cluster_id
 }
 
 data "aws_eks_cluster_auth" "eks_data" {
   count = var.create_eks ? 1 : 0
-  name  = module.eks_cluster.cluster_id
+  name  = module.eks.cluster_id
 }
 
 provider "kubernetes" {
-  alias = "eks"
-
+  # alias = "eks"
   host                   = var.create_eks ? data.aws_eks_cluster.eks_data[0].endpoint : null
   cluster_ca_certificate = var.create_eks ? base64decode(data.aws_eks_cluster.eks_data[0].certificate_authority.0.data) : null
   token                  = var.create_eks ? data.aws_eks_cluster_auth.eks_data[0].token : null
-}
+} 
 
 # ---------------------------------------------------------------------------- #
 # Create IAM user for strongDM to access EKS cluster
@@ -80,7 +59,7 @@ resource "aws_iam_user" "eks_user" {
   name  = "${var.prefix}-eks-user-strongdm"
   path  = "/terraform/"
   tags = merge({
-    Name = "${var.prefix}-eks"
+    Name = "${var.prefix}-eks"  
   }, var.default_tags, var.tags)
 }
 
@@ -146,4 +125,10 @@ resource "sdm_role_grant" "admin_grant_eks" {
   count       = var.create_eks ? 1 : 0
   role_id     = var.admins_id
   resource_id = sdm_resource.k8s_eks_data_eks[0].id
+}
+
+module "configmap" {
+  count       = var.create_eks ? 1 : 0
+  source = "./configmap"
+  role_arn = local.rolearn
 }
