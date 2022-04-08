@@ -55,12 +55,7 @@ resource "aws_instance" "gateway" {
 
   ami           = data.aws_ami.amazon_linux_2.image_id
   instance_type = var.dev_mode ? "t3.micro" : "t3.medium"
-
-  user_data = <<USERDATA
-#!/bin/bash -xe
-curl -J -O -L https://app.strongdm.com/releases/cli/linux && unzip sdmcli* && rm -f sdmcli*
-sudo ./sdm install --relay --token="${aws_ssm_parameter.gateway[count.index].value}"
-USERDATA
+  user_data = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = "${aws_ssm_parameter.gateway[count.index].value}" })
 
   key_name   = var.ssh_key
   monitoring = var.detailed_monitoiring
@@ -125,12 +120,7 @@ resource "aws_instance" "relay" {
 
   ami           = data.aws_ami.amazon_linux_2.image_id
   instance_type = var.dev_mode ? "t3.micro" : "t3.medium"
-
-  user_data = <<USERDATA
-#!/bin/bash -xe
-curl -J -O -L https://app.strongdm.com/releases/cli/linux && unzip sdmcli* && rm -f sdmcli*
-sudo ./sdm install --relay --token="${aws_ssm_parameter.relay[count.index].value}"
-USERDATA
+  user_data = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = "${aws_ssm_parameter.relay[count.index].value}" })
 
   key_name   = var.ssh_key
   monitoring = var.detailed_monitoiring

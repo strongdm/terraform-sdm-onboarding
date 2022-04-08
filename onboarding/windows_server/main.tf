@@ -54,11 +54,11 @@ resource "aws_security_group" "windows_server" {
 # ---------------------------------------------------------------------------- #
 
 data "aws_ami" "windows_server" {
-  owners      = ["amazon"]
   most_recent = true
+  owners      = ["amazon"]
   filter {
     name   = "name"
-    values = ["Windows_Server-2016-English*"]
+    values = ["Windows_Server-2022-English-Full-Base*"]
   }
 }
 

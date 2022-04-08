@@ -62,32 +62,7 @@ resource "aws_instance" "web_page" {
   vpc_security_group_ids = [aws_security_group.web_page[0].id]
 
   # Configures a simple HTTP web page 
-  user_data = <<-EOF
-  #!/bin/bash -xe
-
-  # add sdm public key
-  cat <<SDM_KEY | tee /etc/ssh/sdm_ca.pub
-  ${var.ssh_pubkey}
-  SDM_KEY
-  cat <<SDM_TRUST | sudo tee -a /etc/ssh/sshd_config
-  TrustedUserCAKeys /etc/ssh/sdm_ca.pub
-  SDM_TRUST
-  systemctl restart sshd
-
-  # setup apache
-  yum update -y
-  amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
-  yum install -y httpd mariadb-server
-  systemctl start httpd
-  systemctl enable httpd
-  usermod -a -G apache ec2-user
-  chown -R ec2-user:apache /var/www
-  chmod 2775 /var/www
-  find /var/www -type d -exec chmod 2775 {} \;
-  find /var/www -type f -exec chmod 0664 {} \;
-  echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
-  EOF
-
+  user_data = templatefile("${path.module}/templates/http_install/http_install.tftpl", { SSH_PUB_KEY = "${var.ssh_pubkey}" }) 
   tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
 }
 # ---------------------------------------------------------------------------- #

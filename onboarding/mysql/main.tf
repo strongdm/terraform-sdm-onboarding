@@ -19,43 +19,6 @@ locals {
   mysql_pw        = "strongdmpassword123!@#"
   database        = "strongdmdb"
   table_name      = "strongdm_table"
-  mysql_user_data = <<-USERDATA
-  #!/bin/bash
-
-  # add sdm public key
-  cat <<SDM_KEY | tee /etc/ssh/sdm_ca.pub
-  ${var.ssh_pubkey}
-  SDM_KEY
-  cat <<SDM_TRUST | sudo tee -a /etc/ssh/sshd_config
-  TrustedUserCAKeys /etc/ssh/sdm_ca.pub
-  SDM_TRUST
-  systemctl restart sshd
-
-  # setup mysql
-  sudo apt update -y 
-  sudo apt install -y mysql-server
-  sudo mysql_secure_installation <<EOF
-  n
-  ${local.mysql_pw}
-  ${local.mysql_pw}
-  y
-  n
-  y
-  y
-  EOF
-  sudo mysql --user=root \
-    --password=${local.mysql_pw} \
-    --execute="CREATE DATABASE ${local.database};\
-    CREATE TABLE ${local.database}.${local.table_name} (message VARCHAR(20));\
-    INSERT INTO ${local.database}.${local.table_name} VALUES ('Hello');\
-    CREATE USER '${local.username}'@'%' IDENTIFIED BY '${local.mysql_pw}';\
-    GRANT ALL PRIVILEGES ON *.* TO '${local.username}'@'%';\
-    CREATE USER '${local.username_ro}'@'%' IDENTIFIED BY '${local.mysql_pw}';\
-    GRANT SELECT ON ${local.database}.* TO '${local.username_ro}'@'%';\
-    FLUSH PRIVILEGES;"
-  sudo sed -i "s/.*bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
-  sudo systemctl restart mysql
-  USERDATA
 }
 
 # ---------------------------------------------------------------------------- #
@@ -69,8 +32,14 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
 }
 
 resource "aws_security_group" "mysql" {
@@ -114,7 +83,7 @@ resource "aws_instance" "mysql" {
   instance_type          = "t3.small"
   vpc_security_group_ids = [aws_security_group.mysql[0].id]
   subnet_id              = var.subnet_ids[0]
-  user_data              = local.mysql_user_data
+  user_data              = templatefile("${path.module}/templates/mysql_install/mysql_install.tftpl", { SSH_PUB_KEY = "${var.ssh_pubkey}", MYSQL_ADMIN = "${local.username}", MYSQL_RO = "${local.username_ro}", MYSQL_PW = "${local.mysql_pw}", MYSQL_DB = "${local.database}", MYSQL_TABLE = "${local.table_name}"})
   tags                   = merge({ Name = "${var.prefix}-mysql" }, var.default_tags, var.tags)
 }
 
