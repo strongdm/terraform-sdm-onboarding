@@ -121,12 +121,6 @@ resource "sdm_resource" "k8s_eks_data_eks" {
   }
 }
 
-resource "sdm_role_grant" "admin_grant_eks" {
-  count       = var.create_eks ? 1 : 0
-  role_id     = var.admins_id
-  resource_id = sdm_resource.k8s_eks_data_eks[0].id
-}
-
 module "configmap" {
   count       = var.create_eks ? 1 : 0
   source = "./configmap"

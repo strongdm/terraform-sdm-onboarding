@@ -32,14 +32,8 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
 }
 
 resource "aws_security_group" "mysql" {
@@ -104,11 +98,6 @@ resource "sdm_resource" "mysql_admin" {
   }
 }
 
-resource "sdm_role_grant" "admin_grant_mysql_admin" {
-  role_id     = var.admins_id
-  resource_id = sdm_resource.mysql_admin.id
-}
-
 resource "sdm_resource" "mysql_ro" {
   mysql {
     name     = "${var.prefix}-mysql-read-only"
@@ -120,11 +109,6 @@ resource "sdm_resource" "mysql_ro" {
 
     tags = merge({ Name = "${var.prefix}-mysql-ro" }, var.default_tags, var.tags)
   }
-}
-
-resource "sdm_role_grant" "read_only_grant_mysql_ro" {
-  role_id     = var.read_only_id
-  resource_id = sdm_resource.mysql_ro.id
 }
 
 # ---------------------------------------------------------------------------- #
@@ -143,8 +127,3 @@ resource "sdm_resource" "mysql_ssh" {
   }
 }
 
-resource "sdm_role_grant" "admin_grant_mysql_ssh" {
-  count       = var.create_ssh ? 1 : 0
-  role_id     = var.admins_id
-  resource_id = sdm_resource.mysql_ssh[0].id
-}

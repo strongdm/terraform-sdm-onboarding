@@ -22,24 +22,6 @@ module "strongdm_onboarding" {
   # If set to false the default VPC will be used instead
   # create_vpc = true
 
-
-  # List of existing users to grant resources to
-  # NOTE: These emails must exactly match existing users in strongDM or an error will occur
-  # NOTE: An error will occur if these users are already assigned to a role in strongDM
-  grant_to_existing_users = [
-    var.SDM_ADMINS_EMAILS
-  ]
-
-  # New accounts to create with access to all resources
-  admin_users = [
-    "terraform-admin@example.com",
-  ]
-
-  # New accounts to create with read-only permissions
-  read_only_users = [
-    "terraform-user@example.com",
-  ]
-
   # Tags will be added to strongDM and AWS resources.
   # tags = {}
 }
