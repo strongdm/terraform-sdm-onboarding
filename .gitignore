@@ -4,7 +4,7 @@
 
 ### Terraform ###
 # Local .terraform directories
-**/.terraform/*
+*.terraform*
 
 # .tfstate files
 *.tfstate
@@ -34,3 +34,4 @@ override.tf.json
 
 # End of https://www.toptal.com/developers/gitignore/api/terraform
 
+onboarding/.terraform.lock.hcl
