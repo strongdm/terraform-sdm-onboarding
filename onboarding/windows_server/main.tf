@@ -90,7 +90,3 @@ resource "sdm_resource" "windows_server" {
   }
 }
 
-resource "sdm_role_grant" "admin_grant_windows_server" {
-  role_id     = var.admins_id
-  resource_id = sdm_resource.windows_server.id
-}
