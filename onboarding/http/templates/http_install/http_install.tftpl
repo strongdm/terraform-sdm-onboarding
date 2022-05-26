@@ -2,6 +2,7 @@
 
 # add sdm public key
 echo "${SSH_PUB_KEY}" | tee -a /etc/ssh/sdm_ca.pub
+chmod 600 /etc/ssh/sdm_ca.pub
 echo "TrustedUserCAKeys /etc/ssh/sdm_ca.pub" | tee -a /etc/ssh/sshd_config
 systemctl restart sshd
 
