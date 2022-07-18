@@ -16,12 +16,12 @@ module "strongdm_onboarding" {
   # SSH resources take approximately 5 min
   # create_ssh              = true
   # Gateways take approximately 5 min
-  # create_strongdm_gateways = true
+  create_strongdm_gateways = true
 
   # VPC creation takes approximately 5 min
   # If set to false the default VPC will be used instead
-  # create_vpc = true
+  create_vpc = true
 
   # Tags will be added to strongDM and AWS resources.
-  # tags = {}
+  tags = { usage = "strongdm_demo" }
 }
