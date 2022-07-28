@@ -71,7 +71,10 @@ variable "read_only_users" {
 }
 
 locals {
-  vpc_id         = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
-  subnet_ids      = var.create_vpc ? module.network[0].public_subnets : sort(data.aws_subnets.subnets[0].ids)
-  default_tags   = { CreatedBy = "strongDM-Onboarding" }
+  vpc_id     = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
+  subnet_ids = var.create_vpc ? module.network[0].public_subnets : sort(data.aws_subnets.subnets[0].ids)
+  default_tags = {
+    CreatedBy = "strongDM-Onboarding"
+    Terraform = "true"
+  }
 }
