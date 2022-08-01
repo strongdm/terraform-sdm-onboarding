@@ -7,11 +7,21 @@ data "aws_vpc" "default" {
 }
 
 data "aws_subnets" "subnets" {
-  count  = var.create_vpc ? 0 : 1
+  count = var.create_vpc ? 0 : 1
   filter {
-      name   = "vpc-id"
-      values = [data.aws_vpc.default[0].id]
-    }
+    name   = "vpc-id"
+    values = [data.aws_vpc.default[0].id]
+  }
+}
+
+data "aws_security_group" "default_security_group" {
+  count  = var.create_vpc ? 0 : 1
+  vpc_id = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
+
+  filter {
+    name   = "group-name"
+    values = ["default"]
+  }
 }
 
 # ---------------------------------------------------------------------------- #
