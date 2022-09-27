@@ -15,6 +15,8 @@ To successfully run the AWS Terraform module, you need the following:
 
 ## Run the Terraform Module
 
+To work with the examples in this repository, follow these directions.
+
 1. Clone the repository:
 
     ```shell
