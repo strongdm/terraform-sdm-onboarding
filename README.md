@@ -8,7 +8,7 @@ To successfully run the AWS Terraform module, you need the following:
 
 - A strongDM administrator account. If you do not have one, [sign up](https://www.strongdm.com/signup-contact/) for a trial.
 - A [strongDM API key](https://www.strongdm.com/docs/admin-ui-guide/access/api-keys/), which can be generated in the [strongDM Admin UI](https://app.strongdm.com/app/access/tokens). Your strongDM API key needs all permissions granted to it in order to generate the users and resources for these Terraform scripts.
-- [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v0.13 or higher installed on your computer.
+- [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v0.14.0 or higher installed on your computer.
 - An AWS account and an AWS API key with permissions to provision all intended AWS resources. To control these settings, go to your [AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) and click **Key Pairs**.
 
 > **Warning:** These scripts create infrastructure resources in your AWS account, incurring AWS costs. Once you are done testing, remove these resources to prevent unnecessary AWS costs. You can remove resources manually or with `terraform destroy`. strongDM provides these scripts as is, and does not accept liability for any alterations to AWS assets or any AWS costs incurred.
