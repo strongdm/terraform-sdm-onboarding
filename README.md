@@ -65,8 +65,6 @@ To give you an idea of the script's total run time, estimates are provided to in
 - You can add resource tags at the bottom of the file.
 - You may choose not to provision any of the resources listed by commenting them out in the script, or altering their value to `false`. In order to successfully test, you need to keep at least one or more resource(s) and the strongDM gateways.
 
-> **Note:** If you are using G Suite for an email provider, you may quickly and easily create more users without needing additional mailboxes. To do so, add `+anystring` to the end of the username in the email address. Google ignores the alias and delivers the email to the same inbox, allowing you to create aliases for various purposes while still receiving the mail in one place. Therefore, to create several sample users, you could just add `yourusername+user1@example.com`, `yourusername+user2@example.com`, and `yourusername+user3@example.com`.
-
 ## Conclusion
 
 Feel free to create additional resources and to test as much as needed. If you have any questions, contact our support team at [support@strongdm.com](mailto:support@strongdm.com).
