@@ -63,7 +63,7 @@ You can optionally modify the `onboarding.tf` file to meet your needs, including
 To give you an idea of the script's total run time, the file provides estimates to indicate the time it may take to spin up each resource after Terraform triggers it. Additionally, there are a few other items to consider in relation to the `onboarding.tf` file:
 
 - You can add resource tags at the bottom of the file.
-- You may choose not to provision any of the resources listed by commenting them out in the script or by altering their value to `false`. In order to successfully test, you need to keep at least one resource and the strongDM gateways.
+- You may choose not to provision any of the resources listed by commenting them out in the script or by altering their value to `false`. In order to successfully test, you need to keep at least one resource and one strongDM gateway.
 
 ## Conclusion
 
