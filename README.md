@@ -7,7 +7,7 @@ This Terraform module gets you up and running with strongDM quickly by automatin
 To successfully run the AWS Terraform module, you need the following:
 
 - A strongDM administrator account. If you do not have one, [sign up](https://www.strongdm.com/signup-contact/) for a trial.
-- A [strongDM API key](/docs/admin-ui-guide/access/api-keys/), which you can generate in the [strongDM Admin UI](https://app.strongdm.com/app/access/tokens). Your strongDM API key needs all permissions granted to it in order to generate the users and resources for these Terraform scripts.
+- A [strongDM API key](https://www.strongdm.com/docs/admin-ui-guide/access/api-keys/), which you can generate in the [strongDM Admin UI](https://app.strongdm.com/app/access/tokens). Your strongDM API key needs all permissions granted to it in order to generate the users and resources for these Terraform scripts.
 - [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v0.14.0 or higher installed on your computer.
 - An AWS account and an AWS API key with permissions to provision all intended AWS resources. To control these settings, go to your [AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) and click **Key Pairs**.
 
@@ -67,6 +67,6 @@ To give you an idea of the script's total run time, the file provides estimates 
 
 ## Conclusion
 
-Feel free to create additional resources and to test as much as needed. If you have any questions, contact our Support team at [support@strongdm.com](mailto:support@strongdm.com).
+Feel free to create additional resources and to test as much as needed. If you have any questions, contact our Support team at <support@strongdm.com>.
 
 Once you are finished testing, remember to run `terraform destroy` from your project directory. With this command, Terraform deprovisions the AWS assets it created and it also removes the strongDM assets from the Admin UI. This cleans up after your testing and ensures that test assets do not accumulate unwanted costs while sitting unused.
