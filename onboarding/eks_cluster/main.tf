@@ -34,12 +34,12 @@ module "eks" {
 
 data "aws_eks_cluster" "eks_data" {
   count = var.create_eks ? 1 : 0
-  name  = module.eks.cluster_id
+  name  = module.eks.cluster_name
 }
 
 data "aws_eks_cluster_auth" "eks_data" {
   count = var.create_eks ? 1 : 0
-  name  = module.eks.cluster_id
+  name  = module.eks.cluster_name
 }
 
 provider "kubernetes" {
