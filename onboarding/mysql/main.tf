@@ -4,7 +4,7 @@ terraform {
     aws = ">= 3.0.0"
     sdm = {
       source  = "strongdm/sdm"
-      version = ">= 1.0.15"
+      version = ">= 4.0.0"
     }
   }
 }
