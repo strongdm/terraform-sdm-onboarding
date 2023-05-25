@@ -5,15 +5,15 @@ module "strongdm_onboarding" {
   prefix = "terraform-sdm"
 
   # EKS resources take approximately 20 min
-  # create_eks               = true
-  # Mysql resources take approximately 5 min
+  # create_eks               = false
+  # Mysql resources take approximately 15 min
   # create_mysql             = true
   # RDP resources take approximately 10 min
-  # create_rdp               = true
+  # create_rdp               = false
   # HTTP resources take approximately 5 min
   # NOTE: Before creating HTTP resources, set up TLS here https://app.strongdm.com/app/datasources/websites
   # create_http              = false
-  # SSH resources take approximately 5 min
+  # SSH resources take approximately 5 min (requires create_http)
   # create_ssh              = true
   # Gateways take approximately 5 min
   # create_strongdm_gateways = true

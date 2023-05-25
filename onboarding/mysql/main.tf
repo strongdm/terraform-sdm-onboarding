@@ -15,25 +15,48 @@ terraform {
 
 locals {
   username        = "strongdmadmin"
-  username_ro     = "strongdmreadonly"
-  mysql_pw        = "strongdmpassword123!@#"
+  mysql_pw        = "strongdmpassword!#123#!"
   database        = "strongdmdb"
   table_name      = "strongdm_table"
 }
 
 # ---------------------------------------------------------------------------- #
-# Create EC2 instance with mysql bootstrap script
+# Create RDS mysql instance and replica
 # ---------------------------------------------------------------------------- #
 
-data "aws_ami" "ubuntu" {
-  count       = var.create_ssh ? 1 : 0
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
+resource "aws_db_subnet_group" "mysql_subnet" {
+  name       = "mysql_subnet"
+  subnet_ids = var.subnet_ids
+}
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
-  }
+resource "aws_db_instance" "msyql_rds" {
+  allocated_storage    = 10
+  db_name              = local.database
+  engine               = "mysql"
+  engine_version       = "5.7"
+  instance_class       = "db.t3.micro"
+  username             = local.username
+  password             = local.mysql_pw
+  parameter_group_name = "default.mysql5.7"
+  skip_final_snapshot  = true
+  vpc_security_group_ids = [aws_security_group.mysql[0].id]
+  db_subnet_group_name = aws_db_subnet_group.mysql_subnet.name
+  backup_retention_period = 1
+
+  tags = merge({ Name = "${var.prefix}-mysql" }, var.default_tags, var.tags)
+}
+
+resource "aws_db_instance" "msyql_rds_replica" {
+  engine                 = "mysql"
+  engine_version         = "5.7"
+  instance_class         = "db.t3.micro"
+  password               = local.mysql_pw
+  parameter_group_name   = "default.mysql5.7"
+  skip_final_snapshot    = true
+  vpc_security_group_ids = [aws_security_group.mysql[0].id]
+  replicate_source_db    = aws_db_instance.msyql_rds.id
+
+  tags = merge({ Name = "${var.prefix}-mysql-replica" }, var.default_tags, var.tags)
 }
 
 resource "aws_security_group" "mysql" {
@@ -61,26 +84,6 @@ resource "aws_security_group_rule" "allow_mysql" {
   security_group_id        = aws_security_group.mysql[0].id
 }
 
-resource "aws_security_group_rule" "allow_mysql_ssh" {
-  count                    = var.create_ssh ? 1 : 0
-  type                     = "ingress"
-  from_port                = 22
-  to_port                  = 22
-  protocol                 = "tcp"
-  source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.mysql[0].id
-}
-
-resource "aws_instance" "mysql" {
-  count                  = var.create_ssh ? 1 : 0
-  ami                    = data.aws_ami.ubuntu[0].id
-  instance_type          = "t3.small"
-  vpc_security_group_ids = [aws_security_group.mysql[0].id]
-  subnet_id              = var.subnet_ids[0]
-  user_data              = templatefile("${path.module}/templates/mysql_install/mysql_install.tftpl", { SSH_PUB_KEY = "${var.ssh_pubkey}", MYSQL_ADMIN = "${local.username}", MYSQL_RO = "${local.username_ro}", MYSQL_PW = "${local.mysql_pw}", MYSQL_DB = "${local.database}", MYSQL_TABLE = "${local.table_name}"})
-  tags                   = merge({ Name = "${var.prefix}-mysql" }, var.default_tags, var.tags)
-}
-
 # ---------------------------------------------------------------------------- #
 # Add mysql credentials to strongDM
 # ---------------------------------------------------------------------------- #
@@ -88,7 +91,7 @@ resource "aws_instance" "mysql" {
 resource "sdm_resource" "mysql_admin" {
   mysql {
     name     = "${var.prefix}-mysql-admin"
-    hostname = aws_instance.mysql[0].private_ip
+    hostname = aws_db_instance.msyql_rds.address
     database = local.database
     username = local.username
     password = local.mysql_pw
@@ -100,30 +103,16 @@ resource "sdm_resource" "mysql_admin" {
 
 resource "sdm_resource" "mysql_ro" {
   mysql {
-    name     = "${var.prefix}-mysql-read-only"
-    hostname = aws_instance.mysql[0].private_ip
+    name     = "${var.prefix}-mysql-replica-read-only"
+    hostname = aws_db_instance.msyql_rds_replica.address
     database = local.database
-    username = local.username_ro
+    username = local.username
     password = local.mysql_pw
     port     = 3306
 
-    tags = merge({ Name = "${var.prefix}-mysql-ro" }, var.default_tags, var.tags)
+    tags = merge({ 
+      Name = "${var.prefix}-mysql-ro",
+      ReadOnlyOnboarding = "true"
+    }, var.default_tags, var.tags)
   }
 }
-
-# ---------------------------------------------------------------------------- #
-# Access the EC2 instance with strongDM over SSH
-# ---------------------------------------------------------------------------- #
-
-resource "sdm_resource" "mysql_ssh" {
-  count = var.create_ssh ? 1 : 0
-  ssh_cert {
-    # dependant on https://github.com/strongdm/issues/issues/1701
-    name     = "${var.prefix}-ssh-ubuntu"
-    username = "ubuntu"
-    hostname = aws_instance.mysql[0].private_ip
-    port     = 22
-    tags     = merge({ Name = "${var.prefix}-mysql-ssh" }, var.default_tags, var.tags)
-  }
-}
-
