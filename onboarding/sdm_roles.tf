@@ -3,6 +3,9 @@
 # ---------------------------------------------------------------------------- #
 resource "sdm_role" "admins" {
   name = "${var.prefix}-admin-role"
+  access_rules = jsonencode([
+    { tags = { CreatedBy = "strongDM-Onboarding" } }
+  ])
 }
 resource "sdm_account" "admin_users" {
   count = length(var.admin_users)
@@ -36,6 +39,9 @@ resource "sdm_account_attachment" "existing_users" {
 # ---------------------------------------------------------------------------- #
 resource "sdm_role" "read_only" {
   name = "${var.prefix}-read-only-role"
+  access_rules = jsonencode([
+    { tags = { ReadOnlyOnboarding = "true" } }
+  ])
 }
 resource "sdm_account" "read_only_users" {
   count = length(var.read_only_users)
