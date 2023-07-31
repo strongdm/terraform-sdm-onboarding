@@ -29,15 +29,15 @@ resource "aws_db_subnet_group" "mysql_subnet" {
   subnet_ids = var.subnet_ids
 }
 
-resource "aws_db_instance" "msyql_rds" {
+resource "aws_db_instance" "mysql_rds" {
   allocated_storage    = 10
   db_name              = local.database
   engine               = "mysql"
-  engine_version       = "5.7"
+  engine_version       = "8.0"
   instance_class       = "db.t3.micro"
   username             = local.username
   password             = local.mysql_pw
-  parameter_group_name = "default.mysql5.7"
+  parameter_group_name = "default.mysql8.0"
   skip_final_snapshot  = true
   vpc_security_group_ids = [aws_security_group.mysql[0].id]
   db_subnet_group_name = aws_db_subnet_group.mysql_subnet.name
@@ -46,15 +46,15 @@ resource "aws_db_instance" "msyql_rds" {
   tags = merge({ Name = "${var.prefix}-mysql" }, var.default_tags, var.tags)
 }
 
-resource "aws_db_instance" "msyql_rds_replica" {
+resource "aws_db_instance" "mysql_rds_replica" {
   engine                 = "mysql"
-  engine_version         = "5.7"
+  engine_version         = "8.0"
   instance_class         = "db.t3.micro"
   password               = local.mysql_pw
-  parameter_group_name   = "default.mysql5.7"
+  parameter_group_name   = "default.mysql8.0"
   skip_final_snapshot    = true
   vpc_security_group_ids = [aws_security_group.mysql[0].id]
-  replicate_source_db    = aws_db_instance.msyql_rds.id
+  replicate_source_db    = aws_db_instance.mysql_rds.identifier
 
   tags = merge({ Name = "${var.prefix}-mysql-replica" }, var.default_tags, var.tags)
 }
@@ -91,7 +91,7 @@ resource "aws_security_group_rule" "allow_mysql" {
 resource "sdm_resource" "mysql_admin" {
   mysql {
     name     = "${var.prefix}-mysql-admin"
-    hostname = aws_db_instance.msyql_rds.address
+    hostname = aws_db_instance.mysql_rds.address
     database = local.database
     username = local.username
     password = local.mysql_pw
@@ -104,7 +104,7 @@ resource "sdm_resource" "mysql_admin" {
 resource "sdm_resource" "mysql_ro" {
   mysql {
     name     = "${var.prefix}-mysql-replica-read-only"
-    hostname = aws_db_instance.msyql_rds_replica.address
+    hostname = aws_db_instance.mysql_rds_replica.address
     database = local.database
     username = local.username
     password = local.mysql_pw
