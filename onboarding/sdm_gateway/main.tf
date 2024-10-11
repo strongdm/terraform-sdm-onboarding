@@ -28,10 +28,13 @@ resource "aws_ssm_parameter" "gateway" {
   value = sdm_node.gateway[count.index].gateway.0.token
   name  = "/strongdm/gateway/${sdm_node.gateway[count.index].gateway.0.name}/token"
 
-  overwrite = true
   key_id    = var.encryption_key
 
   tags = merge({ "Name" = sdm_node.gateway[count.index].gateway.0.name }, var.tags, )
+
+  lifecycle { 
+    create_before_destroy = true 
+  }
 }
 
 #################
@@ -105,12 +108,15 @@ resource "aws_ssm_parameter" "relay" {
   value = sdm_node.relay[count.index].relay.0.token
   name  = "/strongdm/relay/${sdm_node.relay[count.index].relay.0.name}/token"
 
-  overwrite = true
   key_id    = var.encryption_key
 
   tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
 
   depends_on = [aws_ssm_parameter.gateway]
+
+  lifecycle {
+    create_before_destroy = true 
+  }
 }
 #################
 # Instance configuration
