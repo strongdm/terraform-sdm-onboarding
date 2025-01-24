@@ -58,6 +58,12 @@ variable "vpc_id" {
   description = "Existing VPC id"
 }
 
+variable "subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "Existing subnet ids"
+}
+
 variable "grant_to_existing_users" {
   type        = list(string)
   default     = []

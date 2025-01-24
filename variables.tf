@@ -25,5 +25,6 @@ variable "AWS_SECRET_ACCESS_KEY" {
 }
 
 variable "REGION_AWS" {
-  type = string
+  type    = string
+  default = null
 }

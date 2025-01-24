@@ -11,9 +11,19 @@ data "aws_vpc" "default" {
 
 data "aws_subnets" "subnets" {
   count = var.create_vpc ? 0 : 1
+
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.default[0].id]
+  }
+
+  dynamic "filter" {
+    for_each = var.subnet_ids != null ? [true] : []
+
+    content {
+      name   = "subnet-id"
+      values = var.subnet_ids
+    }
   }
 }
 
