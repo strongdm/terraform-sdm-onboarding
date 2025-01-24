@@ -2,8 +2,11 @@
 # These data-sources gather the necessary VPC information if create VPC is not specified
 # ---------------------------------------------------------------------------- #
 data "aws_vpc" "default" {
-  count   = var.create_vpc ? 0 : 1
-  default = true
+  count = var.create_vpc ? 0 : 1
+
+  id = var.vpc_id
+
+  default = var.vpc_id == null
 }
 
 data "aws_subnets" "subnets" {
