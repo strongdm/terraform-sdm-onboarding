@@ -70,6 +70,12 @@ variable "read_only_users" {
   description = "A list of email addresses that will receive read only access."
 }
 
+variable "gateway_ingress_ips" {
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+  description = "A list of ingress IPs"
+}
+
 locals {
   vpc_id     = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
   subnet_ids = var.create_vpc ? module.network[0].public_subnets : sort(data.aws_subnets.subnets[0].ids)

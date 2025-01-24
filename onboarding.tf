@@ -22,6 +22,9 @@ module "strongdm_onboarding" {
   # If set to false the default VPC will be used instead
   # create_vpc = true
 
+  # Gateway Ingress IPs default to open to the world.
+  # gateway_ingress_ips = ["0.0.0.0/0"]
+
   # Tags will be added to strongDM and AWS resources.
   # tags = {}
 }
