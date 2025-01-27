@@ -82,3 +82,12 @@ module "http_website" {
   admins_id      = sdm_role.admins.id
   read_only_id   = sdm_role.read_only.id
 }
+
+resource "sdm_policy" "permit_everything" {
+  name        = "permit-everything"
+  description = "Permits everything"
+
+  policy = <<EOP
+permit(principal, action, resource);
+EOP
+}
