@@ -23,6 +23,9 @@ module "strongdm_onboarding" {
   # optionally subnet_ids can also be added to select a subset of subnets
   # create_vpc = true
 
+  # Gateway Ingress IPs default to open to the world.
+  # gateway_ingress_ips = ["0.0.0.0/0"]
+
   # Tags will be added to strongDM and AWS resources.
   # tags = {}
 }

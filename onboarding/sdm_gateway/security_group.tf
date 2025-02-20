@@ -31,7 +31,7 @@ resource "aws_security_group" "this" {
       from_port   = var.gateway_listen_port
       to_port     = var.gateway_listen_port
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = var.gateway_ingress_ips
     }
   }
 
