@@ -19,7 +19,8 @@ module "strongdm_onboarding" {
   # create_strongdm_gateways = true
 
   # VPC creation takes approximately 5 min
-  # If set to false the default VPC will be used instead
+  # If set to false the default VPC will be used instead unless an explicit vpc_id is passed in
+  # optionally subnet_ids can also be added to select a subset of subnets
   # create_vpc = true
 
   # Tags will be added to strongDM and AWS resources.

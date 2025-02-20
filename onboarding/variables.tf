@@ -52,6 +52,18 @@ variable "create_vpc" {
   description = "Set to true to create a VPC to container the resources in this module"
 }
 
+variable "vpc_id" {
+  type        = string
+  default     = null
+  description = "Existing VPC id"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "Existing subnet ids"
+}
+
 variable "grant_to_existing_users" {
   type        = list(string)
   default     = []
