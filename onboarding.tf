@@ -22,6 +22,9 @@ module "strongdm_onboarding" {
   # optionally subnet_ids can also be added to select a subset of subnets
   # create_vpc = true
 
+  # List of email addresses of existing StrongDM users who will receive access to all resources
+  # grant_to_existing_users = []
+
   # StrongDM Proxy Ingress CIDR blocks default to open to the world.
   # ingress_cidr_blocks = ["0.0.0.0/0"]
 
