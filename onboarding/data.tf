@@ -14,26 +14,7 @@ data "aws_subnets" "subnets" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default[0].id]
-  }
-
-  dynamic "filter" {
-    for_each = var.subnet_ids != null ? [true] : []
-
-    content {
-      name   = "subnet-id"
-      values = var.subnet_ids
-    }
-  }
-}
-
-data "aws_security_group" "default_security_group" {
-  count  = var.create_vpc ? 0 : 1
-  vpc_id = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
-
-  filter {
-    name   = "group-name"
-    values = ["default"]
+    values = [local.vpc_id]
   }
 }
 
@@ -41,3 +22,9 @@ data "aws_security_group" "default_security_group" {
 # Grab the strongDM CA public key for the authenticated organization
 # ---------------------------------------------------------------------------- #
 data "sdm_ssh_ca_pubkey" "this_key" {}
+
+data "sdm_account" "existing_users" {
+  count = length(var.grant_to_existing_users)
+  type  = "user"
+  email = var.grant_to_existing_users[count.index]
+}

@@ -4,7 +4,7 @@ variable "tags" {
   description = "This tags will be added to both AWS and strongDM resources"
 }
 
-variable "prefix" {
+variable "name" {
   type        = string
   default     = "strongdm"
   description = "This prefix will be added to various resource names."
@@ -40,12 +40,6 @@ variable "create_ssh" {
   description = "Set to true to create an EC2 instances with SSH access"
 }
 
-variable "create_strongdm_gateways" {
-  type        = bool
-  default     = true
-  description = "Set to true to create a pair of strongDM gateways"
-}
-
 variable "create_vpc" {
   type        = bool
   default     = true
@@ -55,13 +49,19 @@ variable "create_vpc" {
 variable "vpc_id" {
   type        = string
   default     = null
-  description = "Existing VPC id"
+  description = "Existing VPC ID; if set, you must also set public_subnet_ids"
 }
 
-variable "subnet_ids" {
+variable "public_subnet_ids" {
   type        = list(string)
   default     = null
-  description = "Existing subnet ids"
+  description = "Existing public subnet IDs; internet traffic will flow into these"
+}
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "Existing private subnet IDs to deploy resources in; if not set, defaults to public_subnet_ids"
 }
 
 variable "grant_to_existing_users" {
@@ -82,17 +82,8 @@ variable "read_only_users" {
   description = "A list of email addresses that will receive read only access."
 }
 
-variable "gateway_ingress_ips" {
+variable "ingress_cidr_blocks" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
-  description = "A list of ingress IPs"
-}
-
-locals {
-  vpc_id     = var.create_vpc ? module.network[0].vpc_id : data.aws_vpc.default[0].id
-  subnet_ids = var.create_vpc ? module.network[0].public_subnets : sort(data.aws_subnets.subnets[0].ids)
-  default_tags = {
-    CreatedBy = "strongDM-Onboarding"
-    Terraform = "true"
-  }
+  description = "A list of CIDR blocks to allow ingress traffic to resources via StrongDM."
 }

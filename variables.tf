@@ -11,10 +11,6 @@ variable "SDM_API_SECRET_KEY" {
   default   = null
 }
 
-variable "SDM_ADMINS_EMAILS" {
-  type = string
-}
-
 ### AWS ###
 variable "AWS_ACCESS_KEY_ID" {
   type      = string
