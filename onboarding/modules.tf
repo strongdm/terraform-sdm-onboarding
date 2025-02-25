@@ -66,14 +66,13 @@ module "mysql" {
 }
 
 module "http_website" {
-  count            = var.create_http ? 1 : 0
+  count            = var.create_http_ssh ? 1 : 0
   source           = "./http"
-  create_ssh       = var.create_ssh
   name             = var.name
   vpc_id           = local.vpc_id
   tags             = local.tags
   security_group   = module.sdm_proxy_cluster.worker_security_group_id
-  subnet_ids       = local.private_subnet_ids
+  subnet_id        = local.private_subnet_ids[0]
   ssh_pubkey       = data.sdm_ssh_ca_pubkey.this_key.public_key
   proxy_cluster_id = module.sdm_proxy_cluster.id
 }

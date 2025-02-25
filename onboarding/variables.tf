@@ -28,16 +28,10 @@ variable "create_rdp" {
   description = "Set to true to create a Windows Server"
 }
 
-variable "create_http" {
+variable "create_http_ssh" {
   type        = bool
   default     = false
-  description = "Set to true to create an EC2 instance with HTTP resources"
-}
-
-variable "create_ssh" {
-  type        = bool
-  default     = true
-  description = "Set to true to create an EC2 instances with SSH access"
+  description = "Set to true to create an EC2 instance with HTTP and SSH access"
 }
 
 variable "create_vpc" {
