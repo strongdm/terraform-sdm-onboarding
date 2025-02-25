@@ -42,10 +42,6 @@ Our [public GitHub repository](https://github.com/strongdm/terraform-sdm-onboard
     # Otherwise, set your keys
     # export AWS_ACCESS_KEY_ID=xxxxxxxxx
     # export AWS_SECRET_ACCESS_KEY=xxxxxxxxx
-
-    # Finally the terraform vars
-    TF_VAR_REGION_AWS=us-west-1
-    TF_VAR_SDM_ADMINS_EMAILS=youradminuser@org.com
     ```
 
     Note that [direnv](https://direnv.net) is a secure solution to automatically load environment variables from a `.envrc` file as soon as you are in the directory containing the file.

@@ -11,14 +11,3 @@ terraform {
     }
   }
 }
-
-provider "aws" {
-  region     = var.REGION_AWS
-  access_key = var.AWS_ACCESS_KEY_ID
-  secret_key = var.AWS_SECRET_ACCESS_KEY
-}
-
-provider "sdm" {
-  api_access_key = var.SDM_API_ACCESS_KEY
-  api_secret_key = var.SDM_API_SECRET_KEY
-}
