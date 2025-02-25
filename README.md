@@ -1,6 +1,6 @@
 # Quick Start StrongDM with Terraform and AWS
 
-This Terraform module gets you up and running with StrongDM quickly by automating the creation of a variety of users, resources, and gateways. Keep reading to get hands-on experience and test StrongDM's capabilities when integrating with Amazon Web Services (AWS).
+This Terraform module gets you up and running with StrongDM quickly by automating the creation of a proxy cluster and a variety of users and resources. Keep reading to get hands-on experience and test StrongDM's capabilities when integrating with Amazon Web Services (AWS).
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ To successfully run the AWS Terraform module, you need the following:
 - A StrongDM administrator account. If you do not have one, [sign up](https://www.strongdm.com/signup-contact/) for a trial.
 - A [StrongDM API key](https://www.strongdm.com/docs/admin-ui-guide/access/api-keys/), which you can generate in the [StrongDM Admin UI](https://app.strongdm.com/app/access/tokens). Your StrongDM API key needs all permissions granted to it in order to generate the users and resources for these Terraform scripts.
 - [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v0.14.0 or higher installed on your computer.
-- An AWS account and an AWS API key with permissions to provision all intended AWS resources. To control these settings, go to your [AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) and click **Key Pairs**.
+- An AWS SSO account or API key with permissions to provision all intended AWS resources. To control these settings, go to your [AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) and click **Key Pairs**.
 
 > **Warning:** These scripts create infrastructure resources in your AWS account, incurring AWS costs. Once you are done testing, remove these resources to prevent unnecessary AWS costs. You can remove resources manually or with `terraform destroy`. StrongDM provides these scripts as is, and does not accept liability for any alterations to AWS assets or any AWS costs incurred.
 
@@ -58,7 +58,7 @@ Our [public GitHub repository](https://github.com/strongdm/terraform-sdm-onboard
     terraform apply
     ```
 
-    The script runs until it is complete. Note any errors. If there are no errors, you should see new resources, such as gateways, databases, or servers, in the StrongDM Admin UI. Additionally, your AWS Management Console displays any new EC2 instances added when you ran the module.
+    The script runs until it is complete. Note any errors. If there are no errors, you should see new resources, such as databases, clusters, or servers, in the StrongDM Admin UI. Additionally, your AWS Management Console displays any new resources added when you ran the module.
 
 6. If necessary, remove the resources created with your Terraform plan:
 
@@ -73,7 +73,7 @@ You can optionally modify the `onboarding.tf` file to meet your needs, including
 To give you an idea of the script's total run time, the file provides estimates to indicate the time it may take to spin up each resource after Terraform triggers it. Additionally, there are a few other items to consider in relation to the `onboarding.tf` file:
 
 - You can add resource tags at the bottom of the file.
-- You may choose not to provision any of the resources listed by commenting them out in the script or by altering their value to `false`. In order to successfully test, you need to keep at least one resource and one StrongDM gateway.
+- You may choose not to provision any of the resources listed by commenting them out in the script or by altering their value to `false`. In order to successfully test, you need to keep at least one resource.
 
 ## Conclusion
 
