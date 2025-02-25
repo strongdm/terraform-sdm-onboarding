@@ -41,17 +41,17 @@ resource "aws_ecs_task_definition" "this" {
           name  = "SDM_BIND_ADDRESS"
           value = ":${local.container_proxy_port}"
         },
-      ]
-
-      secrets = [
         {
           name  = "SDM_PROXY_CLUSTER_ACCESS_KEY"
           value = sdm_proxy_cluster_key.this.id
         },
+      ]
+
+      secrets = [
         {
           name      = "SDM_PROXY_CLUSTER_SECRET_KEY"
           valueFrom = aws_ssm_parameter.secret_key.arn
-        }
+        },
       ]
     }
   ])
