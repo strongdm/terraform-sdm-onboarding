@@ -43,13 +43,15 @@ module "windows_server" {
 }
 
 module "eks" {
-  source           = "./eks_cluster"
-  create_eks       = var.create_eks
-  name             = var.name
-  subnet_ids       = local.private_subnet_ids
-  vpc_id           = local.vpc_id
-  tags             = local.tags
-  proxy_cluster_id = module.sdm_proxy_cluster.id
+  count                    = var.create_eks ? 1 : 0
+  source                   = "./eks_cluster"
+  name                     = var.name
+  subnet_ids               = local.private_subnet_ids
+  vpc_id                   = local.vpc_id
+  tags                     = local.tags
+  proxy_cluster_id         = module.sdm_proxy_cluster.id
+  worker_role_arn          = module.sdm_proxy_cluster.worker_role_arn
+  worker_security_group_id = module.sdm_proxy_cluster.worker_security_group_id
 }
 
 module "mysql" {
