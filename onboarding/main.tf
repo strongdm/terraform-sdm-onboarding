@@ -22,10 +22,13 @@ module "sdm" {
   source        = "./sdm_gateway"
   sdm_node_name = "${var.prefix}-gateway"
   deploy_vpc_id = local.vpc_id
+
   gateway_subnet_ids = [
     local.subnet_ids[0],
     local.subnet_ids[1]
   ]
+  gateway_ingress_ips = var.gateway_ingress_ips
+
   tags = merge(local.default_tags, var.tags)
 }
 

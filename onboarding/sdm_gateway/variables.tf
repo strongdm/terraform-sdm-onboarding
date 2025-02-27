@@ -17,6 +17,13 @@ variable "gateway_subnet_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "gateway_ingress_ips" {
+  description = "A list of ingress IPs"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "relay_subnet_ids" {
   description = "strongDM relays will be deployed into subnets provided"
   type        = list(string)

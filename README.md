@@ -29,26 +29,40 @@ Our [public GitHub repository](https://github.com/strongdm/terraform-sdm-onboard
     cd terraform-sdm-onboarding
     ```
 
-3. Initialize the working directory containing the Terraform configuration files:
+3. Set environment variables for the API key
+
+    ```shell
+    # strongdm access and secret keys
+    export SDM_API_ACCESS_KEY=auth-xxxxxxxxxxxx
+    export SDM_API_SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    # For the AWS creds, ideally set your profile.
+    export AWS_PROFILE=sandbox-admin
+
+    # Otherwise, set your keys
+    # export AWS_ACCESS_KEY_ID=xxxxxxxxx
+    # export AWS_SECRET_ACCESS_KEY=xxxxxxxxx
+
+    # Finally the terraform vars
+    TF_VAR_REGION_AWS=us-west-1
+    TF_VAR_SDM_ADMINS_EMAILS=youradminuser@org.com
+    ```
+
+    Note that [direnv](https://direnv.net) is a secure solution to automatically load environment variables from a `.envrc` file as soon as you are in the directory containing the file.
+
+4. Initialize the working directory containing the Terraform configuration files:
 
     ```shell
     terraform init
     ```
 
-4. Execute the actions proposed in the Terraform plan:
+5. Execute the actions proposed in the Terraform plan:
 
     ```shell
     terraform apply
     ```
 
-5. The script asks you for the following values. If you prefer not to enter these values each time you run the module, you can store them in the `variables.tf` file found in the root of the project.
-
-    - Your AWS access key ID and secret
-    - Your AWS region
-    - Your StrongDM API key ID and secret
-    - Your StrongDM administrator email
-
-    Once you add these values, the script runs until it is complete. Note any errors. If there are no errors, you should see new resources, such as gateways, databases, or servers, in the StrongDM Admin UI. Additionally, your AWS Management Console displays any new EC2 instances added when you ran the module.
+    The script runs until it is complete. Note any errors. If there are no errors, you should see new resources, such as gateways, databases, or servers, in the StrongDM Admin UI. Additionally, your AWS Management Console displays any new EC2 instances added when you ran the module.
 
 6. If necessary, remove the resources created with your Terraform plan:
 

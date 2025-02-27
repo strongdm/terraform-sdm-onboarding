@@ -58,6 +58,18 @@ variable "create_sdm_policy_permit_everything" {
   description = "Set to true to create a default policy to permit everything"
 }
 
+variable "vpc_id" {
+  type        = string
+  default     = null
+  description = "Existing VPC id"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "Existing subnet ids"
+}
+
 variable "grant_to_existing_users" {
   type        = list(string)
   default     = []
@@ -74,6 +86,12 @@ variable "read_only_users" {
   type        = list(string)
   default     = []
   description = "A list of email addresses that will receive read only access."
+}
+
+variable "gateway_ingress_ips" {
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+  description = "A list of ingress IPs"
 }
 
 locals {
