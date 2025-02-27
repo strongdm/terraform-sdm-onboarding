@@ -52,6 +52,12 @@ variable "create_vpc" {
   description = "Set to true to create a VPC to container the resources in this module"
 }
 
+variable "create_sdm_policy_permit_everything" {
+  type        = bool
+  default     = false
+  description = "Set to true to create a default policy to permit everything"
+}
+
 variable "grant_to_existing_users" {
   type        = list(string)
   default     = []

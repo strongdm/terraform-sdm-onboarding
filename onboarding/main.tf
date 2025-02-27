@@ -84,6 +84,8 @@ module "http_website" {
 }
 
 resource "sdm_policy" "permit_everything" {
+  count = var.create_sdm_policy_permit_everything ? 1 : 0
+
   name        = "permit-everything"
   description = "Permits everything"
 
