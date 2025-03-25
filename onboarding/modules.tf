@@ -38,27 +38,19 @@ module "sdm_gateway" {
   sdm_node_name       = var.name
   deploy_vpc_id       = local.vpc_id
   gateway_subnet_ids  = local.public_subnet_ids
-  relay_subnet_ids    = local.private_subnet_ids
   gateway_ingress_ips = var.ingress_cidr_blocks
   tags                = local.tags
-}
-
-locals {
-  # Use a conditional to select the appropriate security group and other outputs
-  worker_security_group_id = var.use_gateways ? module.sdm_gateway[0].security_group_id : module.sdm_proxy_cluster[0].worker_security_group_id
-  proxy_cluster_id         = var.use_gateways ? "" : module.sdm_proxy_cluster[0].id
-  worker_role_arn          = var.use_gateways ? module.sdm_gateway[0].role_arn : module.sdm_proxy_cluster[0].worker_role_arn
 }
 
 module "windows_server" {
   count            = var.create_rdp ? 1 : 0
   source           = "./windows_server"
   name             = var.name
-  security_group   = local.worker_security_group_id
+  security_group   = try(module.sdm_proxy_cluster[0].worker_security_group_id, module.sdm_gateway[0].gateway_security_group_id)
   subnet_id        = local.private_subnet_ids[0]
   tags             = local.tags
   vpc_id           = local.vpc_id
-  proxy_cluster_id = local.proxy_cluster_id
+  proxy_cluster_id = try(module.sdm_proxy_cluster[0].id, "")
 }
 
 module "eks" {
@@ -68,9 +60,9 @@ module "eks" {
   subnet_ids               = local.private_subnet_ids
   vpc_id                   = local.vpc_id
   tags                     = local.tags
-  proxy_cluster_id         = local.proxy_cluster_id
-  worker_role_arn          = local.worker_role_arn
-  worker_security_group_id = local.worker_security_group_id
+  proxy_cluster_id         = try(module.sdm_proxy_cluster[0].id, "")
+  worker_role_arn          = try(module.sdm_proxy_cluster[0].worker_role_arn, module.sdm_gateway[0].role_arn)
+  worker_security_group_id = try(module.sdm_proxy_cluster[0].worker_security_group_id, module.sdm_gateway[0].gateway_security_group_id)
 }
 
 module "mysql" {
@@ -79,9 +71,9 @@ module "mysql" {
   name             = var.name
   vpc_id           = local.vpc_id
   tags             = local.tags
-  security_group   = local.worker_security_group_id
+  security_group   = try(module.sdm_proxy_cluster[0].worker_security_group_id, module.sdm_gateway[0].gateway_security_group_id)
   subnet_ids       = local.private_subnet_ids
-  proxy_cluster_id = local.proxy_cluster_id
+  proxy_cluster_id = try(module.sdm_proxy_cluster[0].id, "")
 }
 
 module "http_website" {
@@ -90,8 +82,8 @@ module "http_website" {
   name             = var.name
   vpc_id           = local.vpc_id
   tags             = local.tags
-  security_group   = local.worker_security_group_id
+  security_group   = try(module.sdm_proxy_cluster[0].worker_security_group_id, module.sdm_gateway[0].gateway_security_group_id)
   subnet_id        = local.private_subnet_ids[0]
   ssh_pubkey       = data.sdm_ssh_ca_pubkey.this_key.public_key
-  proxy_cluster_id = local.proxy_cluster_id
+  proxy_cluster_id = try(module.sdm_proxy_cluster[0].id, "")
 }

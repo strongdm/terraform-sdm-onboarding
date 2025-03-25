@@ -38,7 +38,7 @@ resource "aws_db_instance" "mysql_rds" {
   engine_version          = "8.0"
   instance_class          = "db.t3.micro"
   username                = local.username
-  password                = local.mysql_pw
+  password_wo             = local.mysql_pw
   parameter_group_name    = "default.mysql8.0"
   skip_final_snapshot     = true
   vpc_security_group_ids  = [aws_security_group.mysql.id]
@@ -52,7 +52,7 @@ resource "aws_db_instance" "mysql_rds_replica" {
   engine                 = "mysql"
   engine_version         = "8.0"
   instance_class         = "db.t3.micro"
-  password               = local.mysql_pw
+  password_wo            = local.mysql_pw
   parameter_group_name   = "default.mysql8.0"
   skip_final_snapshot    = true
   vpc_security_group_ids = [aws_security_group.mysql.id]
