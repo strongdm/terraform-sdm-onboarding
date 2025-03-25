@@ -1,0 +1,58 @@
+Content-Type: multipart/mixed; boundary="//"
+MIME-Version: 1.0
+
+--//
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="cloud-config.txt"
+
+#cloud-config
+cloud_final_modules:
+- [scripts-user, always]
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="userdata.txt"
+
+#!/bin/bash
+# Enable strict error handling for most commands
+set -euo pipefail
+
+if systemctl is-active --quiet sdm-proxy; then
+  echo "Stopping sdm-proxy service..."
+  if ! sudo systemctl stop sdm-proxy; then
+    echo "Warning: Failed to stop sdm-proxy service. It may not be installed." >&2
+  fi
+else
+  echo "sdm-proxy service is not active; nothing to stop."
+fi
+
+echo "Cleaning up old StrongDM files..."
+sudo rm -f /etc/sysconfig/sdm-proxy \
+             /etc/systemd/system/sdm.service \
+             /etc/systemd/system/sdm-proxy.service \
+             /usr/local/bin/sdm \
+             /opt/strongdm/bin/sdm
+
+if [ ! -x "./sdm" ]; then
+  echo "Downloading and extracting the StrongDM CLI..."
+  curl -J -O -L https://app.strongdm.com/releases/cli/linux
+  unzip sdmcli* && rm -f sdmcli*
+else
+  echo "StrongDM CLI is already present."
+fi
+
+if [ ! -f /etc/systemd/system/sdm.service ]; then
+  echo "Installing StrongDM relay..."
+  sudo ./sdm install --relay --token="${SDM_TOKEN}" || {
+    echo "StrongDM relay installation failed" >&2
+    exit 1
+  }
+else
+  echo "StrongDM relay appears to be already installed; skipping installation."
+fi
+--//--

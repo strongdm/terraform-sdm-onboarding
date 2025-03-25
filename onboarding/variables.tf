@@ -87,3 +87,9 @@ variable "ingress_cidr_blocks" {
   default     = ["0.0.0.0/0"]
   description = "A list of CIDR blocks to allow ingress traffic to resources via StrongDM."
 }
+
+variable "use_gateways" {
+  type        = bool
+  default     = false
+  description = "Set to true to deploy legacy gateways instead of a proxy cluster."
+}
