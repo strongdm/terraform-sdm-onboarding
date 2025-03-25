@@ -1,12 +1,18 @@
 terraform {
   required_version = ">= 0.14.0"
   required_providers {
-    aws = ">= 3.0.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0"
+    }
     sdm = {
       source  = "strongdm/sdm"
       version = ">= 4.0.0"
     }
-    tls = ">= 3.0.0"
+    tls = {
+      source  = "hashicorp/tls"
+      version = ">= 3.0.0"
+    }
   }
 }
 
@@ -21,7 +27,7 @@ resource "tls_private_key" "windows_server" {
 }
 
 resource "aws_key_pair" "windows_key" {
-  key_name   = "${var.prefix}-terraform-key"
+  key_name   = "${var.name}-terraform-key"
   public_key = tls_private_key.windows_server.public_key_openssh
 }
 
@@ -30,7 +36,7 @@ resource "aws_key_pair" "windows_key" {
 # ---------------------------------------------------------------------------- #
 
 resource "aws_security_group" "windows_server" {
-  name_prefix = "${var.prefix}-windows-server"
+  name_prefix = "${var.name}-windows-server"
   description = "allows 3389"
   vpc_id      = var.vpc_id
 
@@ -46,7 +52,7 @@ resource "aws_security_group" "windows_server" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = merge({ Name = "${var.prefix}-rdp" }, var.default_tags, var.tags)
+  tags = merge({ Name = "${var.name}-rdp" }, var.tags)
 }
 
 # ---------------------------------------------------------------------------- #
@@ -66,14 +72,14 @@ resource "aws_instance" "windows_server" {
   ami           = data.aws_ami.windows_server.image_id
   instance_type = "t3a.medium"
 
-  subnet_id              = var.subnet_ids
+  subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.windows_server.id]
 
   get_password_data = true
   key_name          = aws_key_pair.windows_key.key_name
   # This key is used to encrypt the windows password
 
-  tags = merge({ Name = "${var.prefix}-rdp" }, var.default_tags, var.tags)
+  tags = merge({ Name = "${var.name}-rdp" }, var.tags)
 }
 
 # ---------------------------------------------------------------------------- #
@@ -81,12 +87,13 @@ resource "aws_instance" "windows_server" {
 # ---------------------------------------------------------------------------- #
 resource "sdm_resource" "windows_server" {
   rdp {
-    name     = "${var.prefix}-rdp"
+    name     = "${var.name}-rdp"
     hostname = aws_instance.windows_server.private_ip
     port     = 3389
     username = "Administrator"
     password = rsadecrypt(aws_instance.windows_server.password_data, tls_private_key.windows_server.private_key_pem)
-    tags     = merge({ Name = "${var.prefix}-rdp" }, var.default_tags, var.tags)
+    tags     = merge({ Name = "${var.name}-rdp" }, var.tags)
+
+    proxy_cluster_id = var.proxy_cluster_id
   }
 }
-

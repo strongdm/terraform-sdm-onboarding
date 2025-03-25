@@ -1,7 +1,10 @@
 terraform {
   required_version = ">= 0.12.26"
   required_providers {
-    aws = ">= 3.0.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0"
+    }
     sdm = {
       source  = "strongdm/sdm"
       version = ">= 1.0.12"
@@ -25,15 +28,15 @@ resource "aws_ssm_parameter" "gateway" {
   count = local.gateway_count
 
   type  = "SecureString"
-  value = sdm_node.gateway[count.index].gateway.0.token
-  name  = "/strongdm/gateway/${sdm_node.gateway[count.index].gateway.0.name}/token"
+  value = sdm_node.gateway[count.index].gateway[0].token
+  name  = "/strongdm/gateway/${sdm_node.gateway[count.index].gateway[0].name}/token"
 
-  key_id    = var.encryption_key
+  key_id = var.encryption_key
 
-  tags = merge({ "Name" = sdm_node.gateway[count.index].gateway.0.name }, var.tags, )
+  tags = merge({ "Name" = sdm_node.gateway[count.index].gateway[0].name }, var.tags, )
 
-  lifecycle { 
-    create_before_destroy = true 
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -58,10 +61,10 @@ resource "aws_instance" "gateway" {
 
   ami           = data.aws_ami.amazon_linux_2.image_id
   instance_type = var.dev_mode ? "t3.micro" : "t3.medium"
-  user_data = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = "${aws_ssm_parameter.gateway[count.index].value}" })
+  user_data     = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = aws_ssm_parameter.gateway[count.index].value })
 
   key_name   = var.ssh_key
-  monitoring = var.detailed_monitoiring
+  monitoring = var.detailed_monitoring
 
   credit_specification {
     # Prevents CPU throttling and potential performance issues with Gateway
@@ -86,7 +89,7 @@ resource "aws_instance" "gateway" {
     # create_before_destroy = true
   }
 
-  tags = merge({ "Name" = sdm_node.gateway[count.index].gateway.0.name }, var.tags, )
+  tags = merge({ "Name" = sdm_node.gateway[count.index].gateway[0].name }, var.tags, )
 }
 
 #### RELAY
@@ -105,17 +108,17 @@ resource "aws_ssm_parameter" "relay" {
   count = local.relay_count
 
   type  = "SecureString"
-  value = sdm_node.relay[count.index].relay.0.token
-  name  = "/strongdm/relay/${sdm_node.relay[count.index].relay.0.name}/token"
+  value = sdm_node.relay[count.index].relay[0].token
+  name  = "/strongdm/relay/${sdm_node.relay[count.index].relay[0].name}/token"
 
-  key_id    = var.encryption_key
+  key_id = var.encryption_key
 
-  tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
+  tags = merge({ "Name" = sdm_node.relay[count.index].relay[0].name }, var.tags, )
 
   depends_on = [aws_ssm_parameter.gateway]
 
   lifecycle {
-    create_before_destroy = true 
+    create_before_destroy = true
   }
 }
 #################
@@ -126,10 +129,10 @@ resource "aws_instance" "relay" {
 
   ami           = data.aws_ami.amazon_linux_2.image_id
   instance_type = var.dev_mode ? "t3.micro" : "t3.medium"
-  user_data = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = "${aws_ssm_parameter.relay[count.index].value}" })
+  user_data     = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = aws_ssm_parameter.relay[count.index].value })
 
   key_name   = var.ssh_key
-  monitoring = var.detailed_monitoiring
+  monitoring = var.detailed_monitoring
 
   credit_specification {
     # Prevents CPU throttling and potential performance issues with Gateway
@@ -150,5 +153,5 @@ resource "aws_instance" "relay" {
     create_before_destroy = true
   }
 
-  tags = merge({ "Name" = sdm_node.relay[count.index].relay.0.name }, var.tags, )
+  tags = merge({ "Name" = sdm_node.relay[count.index].relay[0].name }, var.tags, )
 }

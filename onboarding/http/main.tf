@@ -1,7 +1,10 @@
 terraform {
   required_version = ">= 0.14.0"
   required_providers {
-    aws = ">= 3.0.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0"
+    }
     sdm = {
       source  = "strongdm/sdm"
       version = ">= 4.0.0"
@@ -12,18 +15,16 @@ terraform {
 # ---------------------------------------------------------------------------- #
 # Create an EC2 instance
 # ---------------------------------------------------------------------------- #
-data "aws_ami" "amazon_linux_2" {
-  count       = var.create_ssh ? 1 : 0
+data "aws_ami" "al2023" {
   most_recent = true
   owners      = ["amazon"]
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm*"]
+    values = ["al2023-ami-*-x86_64"]
   }
 }
 resource "aws_security_group" "web_page" {
-  count       = var.create_ssh ? 1 : 0
-  name_prefix = "${var.prefix}-web-page"
+  name_prefix = "${var.name}-web-page"
   description = "allow inbound from strongDM gateway"
   vpc_id      = var.vpc_id
 
@@ -34,49 +35,51 @@ resource "aws_security_group" "web_page" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
+  tags = merge({ Name = "${var.name}-http" }, var.tags)
 }
+
 resource "aws_security_group_rule" "allow_80" {
   type                     = "ingress"
   from_port                = 80
   to_port                  = 80
   protocol                 = "tcp"
   source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.web_page[0].id
+  security_group_id        = aws_security_group.web_page.id
 }
 resource "aws_security_group_rule" "allow_http_ssh" {
-  count                    = var.create_ssh ? 1 : 0
   type                     = "ingress"
   from_port                = 22
   to_port                  = 22
   protocol                 = "tcp"
   source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.web_page[0].id
+  security_group_id        = aws_security_group.web_page.id
 }
+
 resource "aws_instance" "web_page" {
-  count         = var.create_ssh ? 1 : 0
-  ami           = data.aws_ami.amazon_linux_2[0].id
+  ami           = data.aws_ami.al2023.id
   instance_type = "t3.micro"
 
-  subnet_id              = var.subnet_ids[1]
-  vpc_security_group_ids = [aws_security_group.web_page[0].id]
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.web_page.id]
 
-  # Configures a simple HTTP web page 
-  user_data = templatefile("${path.module}/templates/http_install/http_install.tftpl", { SSH_PUB_KEY = "${var.ssh_pubkey}" }) 
-  tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
+  # Configures a simple HTTP web page
+  user_data = templatefile("${path.module}/templates/http_install/http_install.tftpl", { SSH_PUB_KEY = var.ssh_pubkey })
+  tags      = merge({ Name = "${var.name}-http" }, var.tags)
 }
 # ---------------------------------------------------------------------------- #
 # Add the web page to strongDM
 # ---------------------------------------------------------------------------- #
 resource "sdm_resource" "web_page" {
   http_no_auth {
-    name             = "${var.prefix}-http"
-    url              = "http://${aws_instance.web_page[0].private_ip}"
-    default_path     = "/phpinfo.php"
-    healthcheck_path = "/phpinfo.php"
+    name             = "${var.name}-http"
+    url              = "http://${aws_instance.web_page.private_ip}"
+    default_path     = "/"
+    healthcheck_path = "/"
     subdomain        = "simple-web-page"
 
-    tags = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
+    proxy_cluster_id = var.proxy_cluster_id
+
+    tags = merge({ Name = "${var.name}-http" }, var.tags)
   }
 }
 
@@ -84,13 +87,13 @@ resource "sdm_resource" "web_page" {
 # Access the EC2 instance with strongDM over SSH
 # ---------------------------------------------------------------------------- #
 resource "sdm_resource" "ssh_ec2" {
-  count = var.create_ssh ? 1 : 0
   ssh_cert {
-    # dependant on https://github.com/strongdm/issues/issues/1701
-    name     = "${var.prefix}-ssh-amzn2"
+    name     = "${var.name}-ssh-al2023"
     username = "ec2-user"
-    hostname = aws_instance.web_page[0].private_ip
+    hostname = aws_instance.web_page.private_ip
     port     = 22
-    tags     = merge({ Name = "${var.prefix}-http" }, var.default_tags, var.tags)
+    tags     = merge({ Name = "${var.name}-http" }, var.tags)
+
+    proxy_cluster_id = var.proxy_cluster_id
   }
 }

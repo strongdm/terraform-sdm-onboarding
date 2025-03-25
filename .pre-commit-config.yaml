@@ -1,0 +1,25 @@
+repos:
+-   repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
+    rev: v0.6.1
+    hooks:
+    -   id: pre-commit-update
+
+-   repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.28
+    hooks:
+    -   id: terraform-fmt
+        args: ["-recursive"]
+    -   id: terraform-validate
+    -   id: tflint
+    -   id: shellcheck
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-case-conflict
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: detect-private-key
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace

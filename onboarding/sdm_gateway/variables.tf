@@ -49,7 +49,7 @@ variable "dev_mode" {
   type        = bool
   default     = false
 }
-variable "detailed_monitoiring" {
+variable "detailed_monitoring" {
   description = "Enable detailed monitoring all instances created"
   type        = bool
   default     = false

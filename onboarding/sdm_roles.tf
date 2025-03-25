@@ -2,7 +2,7 @@
 # Create an admin role with permissions to all resources
 # ---------------------------------------------------------------------------- #
 resource "sdm_role" "admins" {
-  name = "${var.prefix}-admin-role"
+  name = "${var.name}-admin-role"
   access_rules = jsonencode([
     { tags = { CreatedBy = "strongDM-Onboarding" } }
   ])
@@ -23,11 +23,6 @@ resource "sdm_account_attachment" "admin_attachment" {
 # ---------------------------------------------------------------------------- #
 # Add existing users to admin role
 # ---------------------------------------------------------------------------- #
-data "sdm_account" "existing_users" {
-  count = length(var.grant_to_existing_users)
-  type  = "user"
-  email = var.grant_to_existing_users[count.index]
-}
 resource "sdm_account_attachment" "existing_users" {
   count      = length(var.grant_to_existing_users)
   account_id = element(data.sdm_account.existing_users[count.index].ids, 0)
@@ -38,7 +33,7 @@ resource "sdm_account_attachment" "existing_users" {
 # Create a limited access role with read only permissions
 # ---------------------------------------------------------------------------- #
 resource "sdm_role" "read_only" {
-  name = "${var.prefix}-read-only-role"
+  name = "${var.name}-read-only-role"
   access_rules = jsonencode([
     { tags = { ReadOnlyOnboarding = "true" } }
   ])
@@ -55,4 +50,15 @@ resource "sdm_account_attachment" "read_only_attachment" {
   count      = length(var.read_only_users)
   account_id = sdm_account.read_only_users[count.index].id
   role_id    = sdm_role.read_only.id
+}
+
+resource "sdm_policy" "permit_everything" {
+  count = var.create_sdm_policy_permit_everything ? 1 : 0
+
+  name        = "permit-everything"
+  description = "Permits everything"
+
+  policy = <<EOP
+permit(principal, action, resource);
+EOP
 }

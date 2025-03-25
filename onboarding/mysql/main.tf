@@ -1,7 +1,10 @@
 terraform {
   required_version = ">= 0.14.0"
   required_providers {
-    aws = ">= 3.0.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0"
+    }
     sdm = {
       source  = "strongdm/sdm"
       version = ">= 4.0.0"
@@ -14,10 +17,9 @@ terraform {
 # ---------------------------------------------------------------------------- #
 
 locals {
-  username        = "strongdmadmin"
-  mysql_pw        = "strongdmpassword!#123#!"
-  database        = "strongdmdb"
-  table_name      = "strongdm_table"
+  username = "strongdmadmin"
+  mysql_pw = "strongdmpassword!#123#!"
+  database = "strongdmdb"
 }
 
 # ---------------------------------------------------------------------------- #
@@ -30,38 +32,37 @@ resource "aws_db_subnet_group" "mysql_subnet" {
 }
 
 resource "aws_db_instance" "mysql_rds" {
-  allocated_storage    = 10
-  db_name              = local.database
-  engine               = "mysql"
-  engine_version       = "8.0"
-  instance_class       = "db.t3.micro"
-  username             = local.username
-  password             = local.mysql_pw
-  parameter_group_name = "default.mysql8.0"
-  skip_final_snapshot  = true
-  vpc_security_group_ids = [aws_security_group.mysql[0].id]
-  db_subnet_group_name = aws_db_subnet_group.mysql_subnet.name
+  allocated_storage       = 10
+  db_name                 = local.database
+  engine                  = "mysql"
+  engine_version          = "8.0"
+  instance_class          = "db.t3.micro"
+  username                = local.username
+  password_wo             = local.mysql_pw
+  parameter_group_name    = "default.mysql8.0"
+  skip_final_snapshot     = true
+  vpc_security_group_ids  = [aws_security_group.mysql.id]
+  db_subnet_group_name    = aws_db_subnet_group.mysql_subnet.name
   backup_retention_period = 1
 
-  tags = merge({ Name = "${var.prefix}-mysql" }, var.default_tags, var.tags)
+  tags = merge({ Name = "${var.name}-mysql" }, var.tags)
 }
 
 resource "aws_db_instance" "mysql_rds_replica" {
   engine                 = "mysql"
   engine_version         = "8.0"
   instance_class         = "db.t3.micro"
-  password               = local.mysql_pw
+  password_wo            = local.mysql_pw
   parameter_group_name   = "default.mysql8.0"
   skip_final_snapshot    = true
-  vpc_security_group_ids = [aws_security_group.mysql[0].id]
+  vpc_security_group_ids = [aws_security_group.mysql.id]
   replicate_source_db    = aws_db_instance.mysql_rds.identifier
 
-  tags = merge({ Name = "${var.prefix}-mysql-replica" }, var.default_tags, var.tags)
+  tags = merge({ Name = "${var.name}-mysql-replica" }, var.tags)
 }
 
 resource "aws_security_group" "mysql" {
-  count       = var.create_ssh ? 1 : 0
-  name_prefix = "${var.prefix}-mysql"
+  name_prefix = "${var.name}-mysql"
   description = "allow inbound from strongDM gateway"
   vpc_id      = var.vpc_id
 
@@ -72,7 +73,7 @@ resource "aws_security_group" "mysql" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ Name = "${var.prefix}-mysql" }, var.default_tags, var.tags)
+  tags = merge({ Name = "${var.name}-mysql" }, var.tags)
 }
 
 resource "aws_security_group_rule" "allow_mysql" {
@@ -81,7 +82,7 @@ resource "aws_security_group_rule" "allow_mysql" {
   to_port                  = 3306
   protocol                 = "tcp"
   source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.mysql[0].id
+  security_group_id        = aws_security_group.mysql.id
 }
 
 # ---------------------------------------------------------------------------- #
@@ -90,29 +91,33 @@ resource "aws_security_group_rule" "allow_mysql" {
 
 resource "sdm_resource" "mysql_admin" {
   mysql {
-    name     = "${var.prefix}-mysql-admin"
+    name     = "${var.name}-mysql-admin"
     hostname = aws_db_instance.mysql_rds.address
     database = local.database
     username = local.username
     password = local.mysql_pw
     port     = 3306
 
-    tags = merge({ Name = "${var.prefix}-mysql-admin" }, var.default_tags, var.tags)
+    proxy_cluster_id = var.proxy_cluster_id
+
+    tags = merge({ Name = "${var.name}-mysql-admin" }, var.tags)
   }
 }
 
 resource "sdm_resource" "mysql_ro" {
   mysql {
-    name     = "${var.prefix}-mysql-replica-read-only"
+    name     = "${var.name}-mysql-replica-read-only"
     hostname = aws_db_instance.mysql_rds_replica.address
     database = local.database
     username = local.username
     password = local.mysql_pw
     port     = 3306
 
-    tags = merge({ 
-      Name = "${var.prefix}-mysql-ro",
+    proxy_cluster_id = var.proxy_cluster_id
+
+    tags = merge({
+      Name               = "${var.name}-mysql-ro",
       ReadOnlyOnboarding = "true"
-    }, var.default_tags, var.tags)
+    }, var.tags)
   }
 }
