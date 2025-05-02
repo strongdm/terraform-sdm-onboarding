@@ -19,6 +19,7 @@ terraform {
 locals {
   username = "strongdmadmin"
   mysql_pw = "strongdmpassword!#123#!"
+  mysql_pw_wo = "1"
   database = "strongdmdb"
 }
 
@@ -39,6 +40,7 @@ resource "aws_db_instance" "mysql_rds" {
   instance_class          = "db.t3.micro"
   username                = local.username
   password_wo             = local.mysql_pw
+  password_wo_version = local.mysql_pw_wo
   parameter_group_name    = "default.mysql8.0"
   skip_final_snapshot     = true
   vpc_security_group_ids  = [aws_security_group.mysql.id]
@@ -53,6 +55,7 @@ resource "aws_db_instance" "mysql_rds_replica" {
   engine_version         = "8.0"
   instance_class         = "db.t3.micro"
   password_wo            = local.mysql_pw
+  password_wo_version    = local.mysql_pw_wo
   parameter_group_name   = "default.mysql8.0"
   skip_final_snapshot    = true
   vpc_security_group_ids = [aws_security_group.mysql.id]
