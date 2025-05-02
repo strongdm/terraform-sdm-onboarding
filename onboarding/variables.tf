@@ -4,6 +4,12 @@ variable "tags" {
   description = "This tags will be added to both AWS and strongDM resources"
 }
 
+variable "region" {
+  type        = string
+  default     = "us-west-2"
+  description = "The AWS region to deploy resources in."
+}
+
 variable "name" {
   type        = string
   default     = "strongdm"
