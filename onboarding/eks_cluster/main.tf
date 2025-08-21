@@ -1,28 +1,39 @@
 terraform {
-  required_version = ">= 0.14.0"
+  required_version = ">= 1.0.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 3.0.0"
+      version = ">= 6.0.0" 
     }
     sdm = {
       source  = "strongdm/sdm"
-      version = ">= 4.0.0"
+      version = ">= 15.0.0"
     }
   }
 }
 
-# ---------------------------------------------------------------------------- #
-# Create EKS cluster
-# ---------------------------------------------------------------------------- #
+# =============================================================================
+# AMAZON EKS CLUSTER CREATION
+# =============================================================================
+# Creates an Amazon EKS cluster with StrongDM integration for secure 
+# Kubernetes access. The cluster is configured with proper networking,
+# security groups, and IAM permissions for StrongDM proxy connectivity.
+#
+# Features:
+#   - Multi-AZ deployment for high availability
+#   - Private subnet placement for enhanced security  
+#   - StrongDM proxy integration via access entries
+#   - Cluster security group rules for proxy access
+#   - Automatic StrongDM resource registration
+# =============================================================================
 
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "20.33.1"
-  cluster_name    = "${var.name}-eks"
-  cluster_version = "1.32"
-  subnet_ids      = var.subnet_ids
-  vpc_id          = var.vpc_id
+  source              = "terraform-aws-modules/eks/aws"
+  version             = "~> 21.0"
+  name                = "${var.name}-eks"
+  kubernetes_version  = "1.33"
+  subnet_ids          = var.subnet_ids
+  vpc_id              = var.vpc_id
 
   tags = merge({ Name = "${var.name}-eks" }, var.tags)
 
@@ -41,7 +52,7 @@ module "eks" {
     }
   }
 
-  cluster_security_group_additional_rules = {
+  security_group_additional_rules = {
     strongdm = {
       description              = "Allow traffic from proxy workers to API endpoint"
       protocol                 = "tcp"
@@ -53,23 +64,43 @@ module "eks" {
   }
 }
 
-# ---------------------------------------------------------------------------- #
-# Register the EKS cluster with strongDM
-# ---------------------------------------------------------------------------- #
+# =============================================================================
+# STRONGDM EKS RESOURCE REGISTRATION
+# =============================================================================
+# Registers the EKS cluster as a StrongDM resource to enable secure access
+# through the StrongDM proxy network. This creates a managed connection that
+# allows authorized users to access Kubernetes via kubectl through StrongDM.
+#
+# Configuration:
+#   - Extracts cluster endpoint and region from EKS outputs
+#   - Configures certificate authority for TLS verification
+#   - Associates with specified StrongDM proxy cluster
+#   - Inherits IAM permissions from proxy worker role
+# =============================================================================
 
 resource "sdm_resource" "k8s_eks_data_eks" {
   amazon_eks_instance_profile {
+    # Resource name in StrongDM - must be unique within organization
     name         = "${var.name}-eks"
     cluster_name = module.eks.cluster_name
 
+    # Associate with StrongDM proxy cluster for connection routing
     proxy_cluster_id = var.proxy_cluster_id
 
+    # EKS cluster TLS certificate authority for secure connections
+    # Decoded from base64 format provided by EKS module
     certificate_authority = base64decode(module.eks.cluster_certificate_authority_data)
 
+    # Extract hostname from full EKS endpoint URL
+    # Example: https://ABC123.gr7.us-west-2.eks.amazonaws.com → ABC123.gr7.us-west-2.eks.amazonaws.com
     endpoint = split("//", module.eks.cluster_endpoint)[1]
-    region   = split(".", module.eks.cluster_endpoint)[2]
 
-    # When specified strongDM will inherit permissions from this role
+    # Extract AWS region from EKS endpoint for proper API routing
+    # Example: ABC123.gr7.us-west-2.eks.amazonaws.com → us-west-2
+    region = split(".", module.eks.cluster_endpoint)[2]
+
+    # Resource tags for organization and cost tracking
+    # Merges module tags with EKS-specific naming tag
     tags = merge({
       Name = "${var.name}-eks"
     }, var.tags)
