@@ -8,8 +8,9 @@ To successfully run the AWS Terraform module, you need the following:
 
 - A StrongDM administrator account. If you do not have one, [sign up](https://www.strongdm.com/signup-contact/) for a trial.
 - A [StrongDM API key](https://www.strongdm.com/docs/admin-ui-guide/access/api-keys/), which you can generate in the [StrongDM Admin UI](https://app.strongdm.com/app/access/tokens). Your StrongDM API key needs all permissions granted to it in order to generate the users and resources for these Terraform scripts.
-- [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v0.14.0 or higher installed on your computer.
-- An AWS SSO account or API key with permissions to provision all intended AWS resources. To control these settings, go to your [AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) and click **Key Pairs**.
+- [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) v1.0.0 or higher installed on your computer.
+- An AWS SSO account or API key with permissions to provision all intended AWS resources including VPC, EKS, RDS, and EC2 resources. To control these settings, go to your [AWS Dashboard](https://console.aws.amazon.com/ec2/v2/home) and click **Key Pairs**.
+- Choose an appropriate AWS region for deployment (default: us-west-2).
 
 > **Warning:** These scripts create infrastructure resources in your AWS account, incurring AWS costs. Once you are done testing, remove these resources to prevent unnecessary AWS costs. You can remove resources manually or with `terraform destroy`. StrongDM provides these scripts as is, and does not accept liability for any alterations to AWS assets or any AWS costs incurred.
 
@@ -68,12 +69,48 @@ Our [public GitHub repository](https://github.com/strongdm/terraform-sdm-onboard
 
 ## Customize the Terraform Module
 
-You can optionally modify the `onboarding.tf` file to meet your needs, including altering the resource prefix, or spinning up additional resources that are commented out in the script.
+You can optionally modify the `onboarding.tf` file to meet your needs, including altering the resource prefix, or enabling/disabling specific resources using boolean flags (e.g., `create_eks = true`, `create_mysql = true`).
 
 To give you an idea of the script's total run time, the file provides estimates to indicate the time it may take to spin up each resource after Terraform triggers it. Additionally, there are a few other items to consider in relation to the `onboarding.tf` file:
 
 - You can add resource tags at the bottom of the file.
-- You may choose not to provision any of the resources listed by commenting them out in the script or by altering their value to `false`. In order to successfully test, you need to keep at least one resource.
+- You may choose not to provision any of the resources listed by setting their creation flags to `false` (e.g., `create_eks = false`). In order to successfully test, you need to keep at least one resource enabled.
+
+## Architecture Overview
+
+This Terraform module uses modern StrongDM proxy clusters (serverless ECS Fargate) by default, providing:
+
+- **Serverless Architecture**: ECS Fargate-based proxy clusters with automatic scaling
+- **High Availability**: Multi-AZ deployment across private subnets
+- **Enhanced Security**: VPC isolation, security groups, and encrypted storage
+- **Cost Efficiency**: Pay-per-use serverless model with automatic scaling
+
+The module can also deploy legacy EC2-based gateways if needed by setting `use_gateways = true`.
+
+## Configuration Options
+
+Key configuration variables in `onboarding.tf`:
+
+### Resource Creation Toggles
+- `create_eks` - Amazon EKS cluster (default: false)
+- `create_mysql` - MySQL RDS database (default: true) 
+- `create_rdp` - Windows RDP server (default: false)
+- `create_http_ssh` - Linux HTTP/SSH server (default: false)
+- `create_vpc` - Dedicated VPC infrastructure (default: true)
+
+### Security Configuration
+- `ingress_cidr_blocks` - IP ranges allowed to connect to proxies (default: ["0.0.0.0/0"])
+- `grant_to_existing_users` - Email list for existing StrongDM users
+- `admin_users` - Email list for new admin users to create
+- `read_only_users` - Email list for new read-only users
+
+### Network Configuration
+- `vpc_id` - Use existing VPC instead of creating new one
+- `public_subnet_ids` - Existing public subnets (if using existing VPC)
+- `private_subnet_ids` - Existing private subnets (if using existing VPC)
+
+### Architecture Selection
+- `use_gateways` - Use legacy EC2 gateways instead of modern proxy clusters (default: false)
 
 ## Conclusion
 
