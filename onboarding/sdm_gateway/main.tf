@@ -1,9 +1,8 @@
 # =============================================================================
-# STRONGDM GATEWAY MODULE (LEGACY)
+# STRONGDM GATEWAY MODULE
 # =============================================================================
-# This module creates legacy StrongDM gateways using EC2 instances for
-# secure access to infrastructure resources. This is the traditional
-# deployment method before proxy clusters were introduced.
+# This module creates StrongDM gateways using EC2 instances for
+# secure access to infrastructure resources.
 #
 # Features:
 #   - EC2-based StrongDM gateway deployment
@@ -12,14 +11,9 @@
 #   - Secure token storage in AWS Systems Manager Parameter Store
 #   - CloudWatch monitoring and logging integration
 #
-# DEPRECATION NOTICE:
-#   This legacy gateway approach is being phased out in favor of modern
-#   proxy clusters (ECS Fargate-based). New deployments should use proxy
-#   clusters for better scalability, cost efficiency, and operational simplicity.
-#
-# Migration Path:
-#   Existing gateway deployments can be migrated to proxy clusters.
-#   Contact StrongDM support for migration assistance and planning.
+# Deployment Options:
+#   Both gateway and proxy cluster deployments are fully supported.
+#   Choose based on your infrastructure requirements and preferences.
 # =============================================================================
 
 terraform {

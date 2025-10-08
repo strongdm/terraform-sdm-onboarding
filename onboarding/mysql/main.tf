@@ -48,7 +48,7 @@ locals {
   # Production deployments should use random passwords stored in AWS Secrets Manager
   mysql_pw = "strongdmpassword!#123#!"
 
-  # Password override flag (legacy compatibility)
+  # Password override flag (compatibility)
   mysql_pw_wo = "1"
 
   # Default database name created during instance provisioning

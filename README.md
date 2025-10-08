@@ -85,7 +85,7 @@ This Terraform module uses modern StrongDM proxy clusters (serverless ECS Fargat
 - **Enhanced Security**: VPC isolation, security groups, and encrypted storage
 - **Cost Efficiency**: Pay-per-use serverless model with automatic scaling
 
-The module can also deploy legacy EC2-based gateways if needed by setting `use_gateways = true`.
+The module can also deploy EC2-based gateways if needed by setting `use_gateways = true`.
 
 ## Configuration Options
 
@@ -110,7 +110,7 @@ Key configuration variables in `onboarding.tf`:
 - `private_subnet_ids` - Existing private subnets (if using existing VPC)
 
 ### Architecture Selection
-- `use_gateways` - Use legacy EC2 gateways instead of modern proxy clusters (default: false)
+- `use_gateways` - Use EC2 gateways instead of Proxy clusters (default: false)
 
 ## Conclusion
 
