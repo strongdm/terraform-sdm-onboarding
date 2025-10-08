@@ -349,23 +349,22 @@ variable "ingress_cidr_blocks" {
 
 variable "use_gateways" {
   description = <<-EOT
-    Controls deployment architecture: modern proxy clusters vs legacy gateways.
-    
+    Controls deployment architecture: proxy clusters vs gateways.
+
     Proxy Clusters (use_gateways = false, RECOMMENDED):
-    - Modern serverless architecture using ECS Fargate
+    - Serverless architecture using ECS Fargate
     - Automatic scaling and high availability
     - Reduced operational overhead
     - Better cost efficiency
     - Enhanced security features
-    
-    Legacy Gateways (use_gateways = true, DEPRECATED):
-    - Traditional EC2-based gateway deployment  
+
+    Gateways (use_gateways = true):
+    - EC2-based gateway deployment
     - Manual scaling and maintenance required
-    - Higher operational costs
-    - Limited to older StrongDM features
-    
-    Migration note: Existing gateway deployments can be migrated to proxy clusters.
-    Contact StrongDM support for migration assistance.
+    - Suitable for environments requiring EC2-based infrastructure
+    - Full support for all StrongDM features
+
+    Both deployment methods are fully supported. Choose based on your infrastructure requirements.
   EOT
   type        = bool
   default     = false

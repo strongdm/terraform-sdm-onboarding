@@ -1,13 +1,9 @@
 # =============================================================================
-# STRONGDM GATEWAY MODULE VARIABLES (LEGACY)
+# STRONGDM GATEWAY MODULE VARIABLES
 # =============================================================================
-# Variable definitions for the legacy StrongDM gateway module. This module
+# Variable definitions for the StrongDM gateway module. This module
 # creates traditional EC2-based StrongDM gateways for secure infrastructure access.
 #
-# DEPRECATION NOTICE:
-#   This legacy gateway approach is being phased out in favor of modern
-#   proxy clusters. New deployments should use proxy clusters for better
-#   scalability, cost efficiency, and operational simplicity.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -138,22 +134,11 @@ variable "gateway_ingress_ips" {
 }
 
 # -----------------------------------------------------------------------------
-# LEGACY RELAY CONFIGURATION (DEPRECATED)
+# RELAY CONFIGURATION 
 # -----------------------------------------------------------------------------
 
 variable "relay_subnet_ids" {
-  description = <<-EOT
-    DEPRECATED: Legacy relay subnet configuration for older StrongDM deployments.
-    
-    This variable is maintained for backward compatibility with existing deployments
-    that may have separate relay configurations. New deployments should use
-    proxy clusters instead of separate relay configurations.
-    
-    For modern deployments:
-    - Use proxy clusters for better architecture
-    - Configure through gateway_subnet_ids instead
-    - Consider migration to proxy cluster architecture
-  EOT
+  description = "relay subnet iDs"
   type        = list(string)
   default     = []
 }

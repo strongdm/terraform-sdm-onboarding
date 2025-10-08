@@ -70,9 +70,9 @@ module "sdm_proxy_cluster" {
 }
 
 # -----------------------------------------------------------------------------
-# STRONGDM GATEWAY MODULE (LEGACY)
+# STRONGDM GATEWAY MODULE 
 # -----------------------------------------------------------------------------
-# Creates StrongDM gateway using EC2 instances (legacy deployment method).
+# Creates StrongDM gateway using EC2 instances deployment method.
 # Mutually exclusive with sdm_proxy_cluster - only one proxy type is active.
 module "sdm_gateway" {
   count  = var.use_gateways ? 1 : 0
