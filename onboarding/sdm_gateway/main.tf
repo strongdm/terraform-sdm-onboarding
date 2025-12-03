@@ -158,7 +158,7 @@ resource "aws_instance" "gateway" {
   # Instance metadata service configuration (IMDSv1 for compatibility)
   metadata_options {
     http_endpoint               = "enabled"
-    http_tokens                 = "optional" # Allow both IMDSv1 and IMDSv2 for gateway compatibility
+    http_tokens                 = "required" # Disable IMDS v1
     http_put_response_hop_limit = 2
   }
 
@@ -204,6 +204,7 @@ resource "sdm_node" "relay" {
     name = "${var.sdm_node_name}-relay-${count.index}"
   }
 }
+
 resource "aws_ssm_parameter" "relay" {
   count = local.relay_count
 
@@ -221,6 +222,7 @@ resource "aws_ssm_parameter" "relay" {
     create_before_destroy = true
   }
 }
+
 #################
 # Instance configuration
 #################
@@ -242,6 +244,12 @@ resource "aws_instance" "relay" {
   # Relay Attributes
   subnet_id              = var.relay_subnet_ids[count.index]
   vpc_security_group_ids = [aws_security_group.this["relay"].id]
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required" # Disable IMDS v1
+    http_put_response_hop_limit = 2
+  }
 
   lifecycle {
 
