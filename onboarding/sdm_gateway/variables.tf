@@ -183,19 +183,37 @@ variable "enable_cpu_alarm" {
   default     = false
 }
 
+variable "ami" {
+  description = "AMI ID"
+  type        = string
+  default     = null
+}
+
+variable "ami_filter_name" {
+  description = "AMI filter name"
+  type        = string
+  default     = "amzn2-ami-hvm-*-x86_64-ebs"
+}
+
+variable "ami_filter_owner" {
+  description = "AMI filter owner"
+  type        = string
+  default     = "amazon"
+}
+
 #################
 # Sources latest Amazon Linux 2 AMI ID
 #################
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "default" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = [var.ami_filter_owner]
   filter {
     name   = "state"
     values = ["available"]
   }
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-ebs"]
+    values = [var.ami_filter_name]
   }
 }
 
@@ -203,6 +221,8 @@ data "aws_ami" "amazon_linux_2" {
 # Locals
 #################
 locals {
+  ami = coalesce(var.ami, data.aws_ami.default.image_id)
+
   create_relay   = local.relay_count > 0 ? true : false
   create_gateway = local.gateway_count > 0 ? true : false
 

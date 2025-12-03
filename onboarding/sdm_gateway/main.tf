@@ -140,7 +140,7 @@ resource "aws_instance" "gateway" {
   count = local.gateway_count
 
   # Instance configuration
-  ami           = data.aws_ami.amazon_linux_2.image_id
+  ami           = local.ami
   instance_type = var.dev_mode ? "t3.micro" : "t3.medium" # Size based on environment
 
   # StrongDM gateway installation and configuration
@@ -227,7 +227,7 @@ resource "aws_ssm_parameter" "relay" {
 resource "aws_instance" "relay" {
   count = local.relay_count
 
-  ami           = data.aws_ami.amazon_linux_2.image_id
+  ami           = local.ami
   instance_type = var.dev_mode ? "t3.micro" : "t3.medium"
   user_data     = templatefile("${path.module}/templates/relay_install/relay_install.tftpl", { SDM_TOKEN = aws_ssm_parameter.relay[count.index].value })
 
