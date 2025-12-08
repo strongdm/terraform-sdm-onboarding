@@ -34,6 +34,15 @@ module "strongdm_onboarding" {
   name = "terraform-sdm"
 
   # =============================================================================
+  # ARCHITECTURE CONFIGURATION
+  # =============================================================================
+
+  # StrongDM deployment architecture toggle
+  # When true: Uses StrongDM Gateway architecture (EC2-based gateways with EIPs)
+  # When false: Uses StrongDM Proxy Clusters (managed proxy infrastructure)
+  # use_gateways = false
+
+  # =============================================================================
   # RESOURCE TOGGLES
   # =============================================================================
   # Enable/disable specific resources based on your testing needs.
@@ -47,7 +56,7 @@ module "strongdm_onboarding" {
   # MySQL RDS database instances with secure StrongDM access
   # Creates: RDS MySQL instance, subnet groups, security groups
   # Estimated time: ~15 minutes  
-  # create_mysql = true
+  # create_mysql = false
 
   # Windows Server EC2 instance with RDP access via StrongDM
   # Creates: EC2 Windows instance, security groups, StrongDM RDP resource
