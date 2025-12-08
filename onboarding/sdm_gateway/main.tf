@@ -169,13 +169,9 @@ resource "aws_instance" "gateway" {
     cpu_credits = "unlimited"
   }
 
-  # Network interface attachment
-  dynamic "network_interface" {
-    for_each = count.index < local.gateway_count ? [1] : []
-    content {
-      network_interface_id = aws_network_interface.gateway[count.index].id
-      device_index         = 0 # Primary network interface
-    }
+  # Primary network interface attachment
+  primary_network_interface {
+    network_interface_id = aws_network_interface.gateway[count.index].id
   }
 
   # Lifecycle management for operational stability

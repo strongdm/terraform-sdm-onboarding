@@ -95,7 +95,7 @@ variable "create_mysql" {
     Estimated provisioning time: ~15 minutes
   EOT
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_rdp" {
