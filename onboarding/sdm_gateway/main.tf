@@ -170,11 +170,10 @@ resource "aws_instance" "gateway" {
   }
 
   # Network interface attachment
-  dynamic "network_interface" {
+  dynamic "primary_network_interface" {
     for_each = count.index < local.gateway_count ? [1] : []
     content {
       network_interface_id = aws_network_interface.gateway[count.index].id
-      device_index         = 0 # Primary network interface
     }
   }
 

@@ -192,7 +192,7 @@ variable "ami" {
 variable "ami_filter_name" {
   description = "AMI filter name"
   type        = string
-  default     = "amzn2-ami-hvm-*-x86_64-ebs"
+  default     = "al2023-ami-2023.*-x86_64"
 }
 
 variable "ami_filter_owner" {

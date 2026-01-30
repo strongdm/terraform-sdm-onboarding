@@ -22,6 +22,12 @@ Content-Disposition: attachment;
 # Enable strict error handling for most commands
 set -euo pipefail
 
+# Ensure unzip is installed (required for AL2023 which doesn't include it by default)
+if ! command -v unzip &> /dev/null; then
+  echo "Installing unzip..."
+  sudo dnf install -y unzip 2>/dev/null || sudo yum install -y unzip
+fi
+
 if systemctl is-active --quiet sdm-proxy; then
   echo "Stopping sdm-proxy service..."
   if ! sudo systemctl stop sdm-proxy; then
