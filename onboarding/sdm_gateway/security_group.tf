@@ -25,31 +25,6 @@ resource "aws_security_group" "this" {
 
   vpc_id = var.deploy_vpc_id
 
-  dynamic "ingress" {
-    for_each = local.security_group_details[each.key]["type"] == "gateway" ? [1] : []
-    content {
-      from_port   = var.gateway_listen_port
-      to_port     = var.gateway_listen_port
-      protocol    = "tcp"
-      cidr_blocks = var.gateway_ingress_ips
-    }
-  }
-
-  dynamic "ingress" {
-    for_each = var.ssh_key != null ? [1] : []
-    content {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = [var.ssh_source]
-    }
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
   timeouts {
     delete = "2m"
   }
@@ -57,4 +32,37 @@ resource "aws_security_group" "this" {
     create_before_destroy = true
   }
   tags = merge({ "Name" = "${var.sdm_node_name}-node" }, var.tags, )
+}
+
+# Gateway listen port: one ingress rule per allowed CIDR, only when gateway SG exists.
+resource "aws_vpc_security_group_ingress_rule" "gateway_listen" {
+  for_each = local.create_gateway ? toset(var.gateway_ingress_ips) : toset([])
+
+  security_group_id = aws_security_group.this["gateway"].id
+  description       = "strongDM gateway listen port"
+  from_port         = var.gateway_listen_port
+  to_port           = var.gateway_listen_port
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
+}
+
+# Optional SSH ingress: applies to every SG (gateway and/or relay) when ssh_key is set.
+resource "aws_vpc_security_group_ingress_rule" "ssh" {
+  for_each = var.ssh_key != null ? toset(local.security_groups) : toset([])
+
+  security_group_id = aws_security_group.this[each.value].id
+  description       = "SSH from operator source"
+  from_port         = 22
+  to_port           = 22
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.ssh_source
+}
+
+# Allow all egress from every SG.
+resource "aws_vpc_security_group_egress_rule" "all" {
+  for_each = toset(local.security_groups)
+
+  security_group_id = aws_security_group.this[each.value].id
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
 }

@@ -65,15 +65,6 @@ resource "aws_security_group" "web_page" {
   description = "HTTP/SSH server security group - allows access from StrongDM proxies only"
   vpc_id      = var.vpc_id
 
-  # Outbound rules (allow all egress for package updates, external API calls)
-  egress {
-    description = "All outbound traffic for system updates and external communication"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = merge({
     Name    = "${var.name}-http-sg",
     Purpose = "HTTP/SSH server access control"
@@ -83,34 +74,32 @@ resource "aws_security_group" "web_page" {
 # -----------------------------------------------------------------------------
 # SECURITY GROUP RULES
 # -----------------------------------------------------------------------------
-# Define specific ingress rules allowing HTTP and SSH access from StrongDM proxies only
+# Egress: allow all outbound for package updates and external API calls.
+# Ingress: HTTP (80) and SSH (22) from StrongDM proxy security group only.
 
-# HTTP access rule (port 80)
-resource "aws_security_group_rule" "allow_80" {
-  type        = "ingress"
-  description = "HTTP access from StrongDM proxy instances"
-
-  from_port = 80
-  to_port   = 80
-  protocol  = "tcp"
-
-  # Allow access only from StrongDM proxy security group
-  source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.web_page.id
+resource "aws_vpc_security_group_egress_rule" "web_page_all" {
+  security_group_id = aws_security_group.web_page.id
+  description       = "All outbound traffic for system updates and external communication"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
-# SSH access rule (port 22)
-resource "aws_security_group_rule" "allow_http_ssh" {
-  type        = "ingress"
-  description = "SSH access from StrongDM proxy instances"
+resource "aws_vpc_security_group_ingress_rule" "allow_80" {
+  security_group_id            = aws_security_group.web_page.id
+  description                  = "HTTP access from StrongDM proxy instances"
+  from_port                    = 80
+  to_port                      = 80
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.security_group
+}
 
-  from_port = 22
-  to_port   = 22
-  protocol  = "tcp"
-
-  # Allow SSH access only from StrongDM proxy security group
-  source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.web_page.id
+resource "aws_vpc_security_group_ingress_rule" "allow_http_ssh" {
+  security_group_id            = aws_security_group.web_page.id
+  description                  = "SSH access from StrongDM proxy instances"
+  from_port                    = 22
+  to_port                      = 22
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.security_group
 }
 
 # -----------------------------------------------------------------------------

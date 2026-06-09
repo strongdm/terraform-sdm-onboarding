@@ -71,28 +71,28 @@ resource "aws_security_group" "windows_server" {
   description = "Windows Server security group - allows RDP from StrongDM proxies only"
   vpc_id      = var.vpc_id
 
-  # Inbound rules - allow RDP access from StrongDM proxies only
-  ingress {
-    description     = "RDP access from StrongDM proxy instances"
-    from_port       = 3389 # Remote Desktop Protocol port
-    to_port         = 3389
-    protocol        = "tcp"
-    security_groups = [var.security_group] # StrongDM proxy security group
-  }
-
-  # Outbound rules - allow all egress for Windows Updates and software installation
-  egress {
-    description = "All outbound traffic for Windows updates and system operations"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = merge({
     Name    = "${var.name}-rdp-sg",
     Purpose = "Windows Server RDP access control"
   }, var.tags)
+}
+
+# Ingress: RDP (3389) from StrongDM proxy security group only.
+resource "aws_vpc_security_group_ingress_rule" "windows_rdp" {
+  security_group_id            = aws_security_group.windows_server.id
+  description                  = "RDP access from StrongDM proxy instances"
+  from_port                    = 3389
+  to_port                      = 3389
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.security_group
+}
+
+# Egress: allow all outbound for Windows Updates and software installation.
+resource "aws_vpc_security_group_egress_rule" "windows_all" {
+  security_group_id = aws_security_group.windows_server.id
+  description       = "All outbound traffic for Windows updates and system operations"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 # -----------------------------------------------------------------------------

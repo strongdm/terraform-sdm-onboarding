@@ -163,16 +163,6 @@ resource "aws_security_group" "mysql" {
   description = "MySQL database security group - allows inbound from StrongDM proxies only"
   vpc_id      = var.vpc_id
 
-  # Outbound rules (allow all egress for database operations)
-  # Required for RDS maintenance, monitoring, and replication
-  egress {
-    description = "All outbound traffic for RDS operations"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = merge({
     Name    = "${var.name}-mysql-sg",
     Purpose = "MySQL database access control"
@@ -180,23 +170,25 @@ resource "aws_security_group" "mysql" {
 }
 
 # -----------------------------------------------------------------------------
-# MYSQL SECURITY GROUP INGRESS RULE
+# MYSQL SECURITY GROUP RULES
 # -----------------------------------------------------------------------------
-# Allows MySQL traffic (port 3306) from StrongDM proxy security group only
-# Implements principle of least privilege for database access
+# Egress: allow all outbound for RDS maintenance, monitoring, and replication.
+# Ingress: MySQL port 3306 from StrongDM proxy security group only.
 
-resource "aws_security_group_rule" "allow_mysql" {
-  type        = "ingress"
-  description = "MySQL access from StrongDM proxy instances"
+resource "aws_vpc_security_group_egress_rule" "mysql_all" {
+  security_group_id = aws_security_group.mysql.id
+  description       = "All outbound traffic for RDS operations"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+}
 
-  # MySQL standard port
-  from_port = 3306
-  to_port   = 3306
-  protocol  = "tcp"
-
-  # Source: StrongDM proxy security group (not direct IP access)
-  source_security_group_id = var.security_group
-  security_group_id        = aws_security_group.mysql.id
+resource "aws_vpc_security_group_ingress_rule" "allow_mysql" {
+  security_group_id            = aws_security_group.mysql.id
+  description                  = "MySQL access from StrongDM proxy instances"
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.security_group
 }
 
 # =============================================================================
