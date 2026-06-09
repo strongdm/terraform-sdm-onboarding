@@ -36,7 +36,7 @@ terraform {
     # Manages VPC, EKS, RDS, EC2, security groups, and IAM resources
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0.0" 
+      version = ">= 6.0.0"
     }
 
     # StrongDM Provider for access management
@@ -44,7 +44,7 @@ terraform {
     # Uses API keys from SDM_API_ACCESS_KEY and SDM_API_SECRET_KEY environment variables
     sdm = {
       source  = "strongdm/sdm"
-      version = ">= 15.0.0"
+      version = ">= 17.0.0"
     }
   }
 }

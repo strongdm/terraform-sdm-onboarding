@@ -3,11 +3,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0.0" 
+      version = ">= 6.0.0"
     }
     sdm = {
       source  = "strongdm/sdm"
-      version = ">= 15.0.0"
+      version = ">= 17.0.0"
     }
   }
 }
@@ -28,12 +28,12 @@ terraform {
 # =============================================================================
 
 module "eks" {
-  source              = "terraform-aws-modules/eks/aws"
-  version             = "~> 21.0"
-  name                = "${var.name}-eks"
-  kubernetes_version  = "1.33"
-  subnet_ids          = var.subnet_ids
-  vpc_id              = var.vpc_id
+  source             = "terraform-aws-modules/eks/aws"
+  version            = ">= 21.0.0"
+  name               = "${var.name}-eks"
+  kubernetes_version = "1.33"
+  subnet_ids         = var.subnet_ids
+  vpc_id             = var.vpc_id
 
   tags = merge({ Name = "${var.name}-eks" }, var.tags)
 

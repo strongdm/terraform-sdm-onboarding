@@ -26,14 +26,14 @@ terraform {
     # Used for: VPC, EKS, RDS, EC2, Security Groups, etc.
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0.0" 
+      version = ">= 6.0.0"
     }
 
     # StrongDM Provider - manages StrongDM resources and access policies  
     # Used for: proxy clusters, resource registration, user access, roles
     sdm = {
       source  = "strongdm/sdm"
-      version = ">= 15.0.0"
+      version = ">= 17.0.0"
     }
   }
 }

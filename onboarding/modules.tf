@@ -35,15 +35,21 @@ module "network" {
 # Always deployed as it's required for proxy cluster functionality.
 module "ecs_cluster" {
   source  = "terraform-aws-modules/ecs/aws//modules/cluster"
-  version = "5.7.3"
+  version = ">= 7.0.0"
 
-  cluster_name = local.ecs_cluster_name
+  name = local.ecs_cluster_name
 
   # Disable default CloudWatch log group to avoid conflicts
   create_cloudwatch_log_group = false
 
-  # Enable Fargate capacity provider for serverless container execution
-  fargate_capacity_providers = { FARGATE = "" }
+  # Associate Fargate capacity providers with the cluster for serverless container execution.
+  # Replaces fargate_capacity_providers (removed in v6.0); v7.0 also requires cluster_capacity_providers.
+  cluster_capacity_providers = ["FARGATE"]
+  default_capacity_provider_strategy = {
+    FARGATE = {
+      weight = 100
+    }
+  }
 
   tags = local.tags
 }

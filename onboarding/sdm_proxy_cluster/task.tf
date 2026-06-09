@@ -55,7 +55,7 @@ resource "aws_ecs_task_definition" "this" {
           mode                  = "non-blocking" # Non-blocking prevents log congestion
           awslogs-group         = aws_cloudwatch_log_group.this.name
           awslogs-stream-prefix = "proxy_cluster" # Log stream naming prefix
-        awslogs-region = data.aws_region.current.id }
+        awslogs-region = data.aws_region.current.region }
       }
 
       environment = [
